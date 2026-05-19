@@ -1,0 +1,15 @@
+User-agent: *
+Disallow: /admin
+Disallow: /api/
+
+User-agent: Twitterbot
+Allow: /static/
+
+User-agent: facebookexternalhit
+Allow: /static/
+
+User-agent: LinkedInBot
+Allow: /static/
+
+User-agent: TelegramBot
+Allow: /static/

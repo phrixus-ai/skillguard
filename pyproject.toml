@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skillguard"
+version = "0.1.0"
+description = "AI Skill & Prompt Security Scanner — detect malware, prompt injection, and credential leaks in AI skills, MCP servers, and prompt files"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+authors = [
+    {name = "Burak Gider", email = "burak@burakgider.com"},
+]
+keywords = ["security", "ai", "prompt-injection", "malware", "skill-scanner", "huggingface", "mcp", "supply-chain"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "rich>=13.0",
+    "click>=8.0",
+    "pathspec>=0.11",
+    "pyyaml>=6.0",
+    "flask>=3.0",
+    "werkzeug>=3.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+mcp = [
+    "mcp>=1.0",
+]
+
+[project.scripts]
+skillguard = "skillguard.cli:main"
+skillguard-mcp = "skillguard.mcp_server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

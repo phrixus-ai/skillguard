@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="{% if is_production %}index, follow{% else %}noindex, nofollow{% endif %}">
+<title>{{ seo.title }}</title>
+<!-- Google tag (gtag.js) -->
+{% if ga_id and ga_id != 'G-XXXXXXXXXX' %}
+<script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_id }}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '{{ ga_id }}');
+</script>
+{% endif %}
+
+<!-- SEO Meta -->
+<meta name="description" content="{{ seo.desc }}">
+<meta name="keywords" content="AI security scanner, prompt injection detection, skill security, plugin scanner, malware detection, AI safety, credential leak detector, MCP security">
+<meta name="author" content="PHRIXUS">
+<meta name="theme-color" content="#00d992">
+{% if site_url %}
+<link rel="canonical" href="{{ site_url }}{{ seo.slug }}">
+
+<!-- Open Graph (Facebook, LinkedIn, Discord) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ seo.title }}">
+<meta property="og:description" content="{{ seo.og_desc }}">
+<meta property="og:url" content="{{ site_url }}{{ seo.slug }}/">
+<meta property="og:image" content="{{ site_url }}/static/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ seo.title }}">
+<meta name="twitter:description" content="{{ seo.og_desc }}">
+<meta name="twitter:image" content="{{ site_url }}/static/og-image.png">
+{% else %}
+<!-- Open Graph (Facebook, LinkedIn, Discord) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ seo.title }}">
+<meta property="og:description" content="{{ seo.og_desc }}">
+<meta property="og:image" content="/static/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ seo.title }}">
+<meta name="twitter:description" content="{{ seo.og_desc }}">
+<meta name="twitter:image" content="/static/og-image.png">
+{% endif %}
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link rel="icon" type="image/png" href="/static/favicon.png">
+
+<!-- GEO & Language -->
+<meta name="language" content="English">
+<meta property="og:locale" content="en_US">
+<meta name="geo.region" content="TR">
+<meta name="geo.country" content="TR">
+
+<!-- Age Rating -->
+<meta name="rating" content="general">
+<meta name="age-rating" content="0+">
+<meta property="og:restrictions:age" content="0+">
+
+<!-- Structured Data (JSON-LD) -->
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "SkillGuard",
+    "description": "Free AI Skill & Prompt Security Scanner. Detect malware, prompt injection, hidden payloads, and credential leaks.",
+{% if site_url %}
+    "url": "{{ site_url }}",
+    "screenshot": "{{ site_url }}/static/og-image.png",
+{% endif %}
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Any",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "PHRIXUS",
+    "url": "https://github.com/phrixus-ai"
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareSourceCode",
+    "name": "SkillGuard",
+    "codeRepository": "https://github.com/phrixus-ai/skillguard",
+    "programmingLanguage": "Python",
+    "license": "https://github.com/phrixus-ai/skillguard/blob/main/LICENSE"
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {% if active_tab == "prompt" %}
+      {
+        "@type": "Question",
+        "name": "What is prompt injection?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Prompt injection is an attack where malicious instructions are embedded in text to manipulate AI models into bypassing safety controls, leaking data, or performing unintended actions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does prompt injection detection work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "SkillGuard uses 79 patterns across 7 categories including system override attempts, jailbreak techniques, and data exfiltration patterns to detect and flag prompt injection attacks."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can AI chatbots be hacked through prompts?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. AI systems can be manipulated through carefully crafted prompts that exploit how they process instructions, potentially leaking sensitive data, bypassing content filters, or executing unauthorized actions."
+        }
+      }
+      {% elif active_tab == "file" %}
+      {
+        "@type": "Question",
+        "name": "What file types can SkillGuard scan?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "SkillGuard scans Python (.py), JavaScript (.js), Shell (.sh), YAML, JSON, Markdown (.md), and ZIP archives containing any of these file types."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does file malware detection work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "SkillGuard uses 136 patterns across 10 categories to detect reverse shells, obfuscated code, credential theft, hidden payloads, supply chain attacks, and persistence mechanisms in code files."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is SkillGuard file scanning safe?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Files are scanned in memory and discarded after analysis. No files are stored, shared, or transmitted to third parties."
+        }
+      }
+      {% elif active_tab == "url" %}
+      {
+        "@type": "Question",
+        "name": "Can SkillGuard scan GitHub repositories?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. SkillGuard clones GitHub and HuggingFace repositories, extracts all supported file types, and scans every file with 215+ security patterns to produce a comprehensive security score."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is repository security auditing?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Repository security auditing involves scanning an entire codebase for vulnerabilities including malicious code, hidden backdoors, credential leaks, insecure dependencies, and supply chain attack vectors."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How long does a repository scan take?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most repository scans complete within seconds depending on the repository size and number of files. Large repositories with hundreds of files may take up to a minute."
+        }
+      }
+      {% else %}
+      {
+        "@type": "Question",
+        "name": "What is SkillGuard?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "SkillGuard is a free, open-source security scanner that detects malicious skills, prompt injection, hidden payloads, and credential leaks in AI plugins and MCP servers."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How does SkillGuard detect threats?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "SkillGuard uses 215+ security patterns across 17 categories to identify malicious code, prompt injection, data exfiltration, and supply chain attacks in AI skills and plugins."
+        }
+      }
+      {% endif %}
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "{{ seo.title }}",
+    "description": "{{ seo.desc }}",
+{% if site_url %}
+    "url": "{{ site_url }}{{ seo.slug }}",
+{% endif %}
+    "isPartOf": {
+      "@type": "WebApplication",
+      "name": "SkillGuard"
+    }
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SearchAction",
+    "target": "https://skillguard.burakgider.com/?scan={search_term_string}",
+    "query-input": "required name=search_term_string",
+    "description": "Scan any URL for security threats"
+  }
+]
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+:root {
+    --abyss: #050507;
+    --carbon: #101010;
+    --charcoal: #3d3a39;
+    --charcoal-light: #5a5554;
+    --emerald: #00d992;
+    --emerald-mint: #2fd6a1;
+    --emerald-glow: rgba(0,217,146,0.15);
+    --emerald-border: rgba(0,217,146,0.3);
+    --snow: #f2f2f2;
+    --parchment: #b8b3b0;
+    --steel: #8b949e;
+    --red: #fb565b; --red-bg: rgba(251,86,91,0.1); --red-border: rgba(251,86,91,0.3);
+    --amber: #ffba00; --amber-bg: rgba(255,186,0,0.1); --amber-border: rgba(255,186,0,0.3);
+    --blue: #4cb3d4; --blue-bg: rgba(76,179,212,0.1); --blue-border: rgba(76,179,212,0.3);
+    --radius-sm: 4px; --radius: 6px; --radius-lg: 8px;
+    --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-body); background: var(--abyss); color: var(--snow); min-height: 100vh; display: flex; flex-direction: column; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+a { color: var(--emerald); text-decoration: none; }
+
+/* ═══ AMBIENT BACKGROUND ═══ */
+body::before {
+    content: '';
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(ellipse at 20% 20%, rgba(0,217,146,0.03) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(76,179,212,0.04) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(0,217,146,0.02) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ═══ CONTAINER ═══ */
+.container {
+    max-width: 1280px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ═══ HEADER BAR ═══ */
+.header {
+    position: relative;
+    z-index: 1;
+    background: var(--carbon);
+    border-bottom: 1px solid var(--charcoal);
+    padding: 16px 0;
+}
+.header .container { gap: 16px; }
+.header-left { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+.header-logo {
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    color: var(--snow);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.header-logo .logo-svg {
+    width: 24px;
+    height: 24px;
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+.header-logo .logo-svg .st0 { fill: var(--emerald); }
+@keyframes pulse-glow { 0%,100% { filter: drop-shadow(0 0 2px var(--emerald)); } 50% { filter: drop-shadow(0 0 6px var(--emerald)); } }
+.header-tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--steel);
+    border: 1px solid var(--charcoal);
+    border-radius: var(--radius-sm);
+    padding: 3px 10px;
+}
+.header-right {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--steel);
+    letter-spacing: 0.5px;
+}
+@media (max-width: 600px) {
+    .header { flex-direction: column; align-items: flex-start; padding: 12px 16px; gap: 4px; }
+    .header-right { font-size: 9px; letter-spacing: 0.3px; opacity: 0.7; }
+}
+
+/* ═══ TABS ═══ */
+.tabs {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    background: var(--carbon);
+    border-bottom: 1px solid var(--charcoal);
+}
+.tabs .container {
+    padding: 0 32px;
+    gap: 0;
+    display: flex;
+    justify-content: flex-start;
+}
+.tab {
+    padding: 14px 28px;
+    cursor: pointer;
+    color: var(--steel);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    user-select: none;
+    text-decoration: none;
+    display: inline-block;
+}
+.tab:hover { color: var(--parchment); background: rgba(255,255,255,0.02); }
+.tab.active { color: var(--emerald); border-bottom-color: var(--emerald); background: rgba(0,217,146,0.05); }
+
+/* ═══ MAIN ═══ */
+.main {
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    padding: 28px 32px;
+    max-width: 1280px;
+    width: 100%;
+    margin: 0 auto;
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeSlide 0.25s ease; }
+@keyframes fadeSlide { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══ FORMS ═══ */
+.form-group { margin-bottom: 20px; }
+.form-group label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--steel);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+textarea {
+    width: 100%;
+    min-height: 190px;
+    background: var(--abyss);
+    border: 1px solid var(--charcoal);
+    border-radius: var(--radius);
+    color: var(--snow);
+    padding: 14px 16px;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    resize: vertical;
+    transition: border-color 0.2s;
+    line-height: 1.6;
+}
+textarea:focus { outline: none; border-color: var(--emerald); box-shadow: 0 0 0 1px var(--emerald-border); }
+input[type="text"] {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--abyss);
+    border: 1px solid var(--charcoal);
+    border-radius: var(--radius);
+    color: var(--snow);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+input[type="text"]:focus { outline: none; border-color: var(--emerald); box-shadow: 0 0 0 1px var(--emerald-border); }
+
+/* FILE DROP */
+.upload-zone {
+    border: 1px dashed var(--charcoal-light);
+    border-radius: var(--radius-lg);
+    padding: 48px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: rgba(255,255,255,0.01);
+}
+.upload-zone:hover { border-color: var(--emerald); background: var(--emerald-glow); }
+.upload-zone .icon { font-size: 36px; margin-bottom: 10px; }
+.upload-zone p { color: var(--parchment); font-size: 14px; }
+.upload-zone .sub { font-size: 12px; color: var(--steel); margin-top: 6px; }
+.file-input { display: none; }
+
+/* BUTTONS */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border: 1px solid var(--charcoal);
+    border-radius: var(--radius);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: transparent;
+    color: var(--snow);
+}
+.btn:hover { background: rgba(255,255,255,0.05); border-color: var(--charcoal-light); }
+.btn-primary { background: var(--emerald); color: var(--abyss); border-color: var(--emerald); font-weight: 600; }
+.btn-primary:hover { background: var(--emerald-mint); border-color: var(--emerald-mint); }
+.btn-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+.btn-row { display: flex; gap: 12px; align-items: center; margin-top: 20px; }
+
+/* ═══ RESULTS ═══ */
+.results { display: none; margin-top: 24px; }
+.results.visible { display: block; animation: fadeSlide 0.25s ease; }
+
+/* STATS — 6 kolon */
+.stats-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin-bottom: 20px; }
+.stat-box {
+    background: var(--carbon);
+    border: 1px solid var(--charcoal);
+    border-radius: var(--radius);
+    padding: 18px 12px;
+    text-align: center;
+}
+.stat-value { font-family: var(--font-mono); font-size: 26px; font-weight: 700; line-height: 1.2; }
+.stat-label { font-family: var(--font-mono); font-size: 11px; font-weight: 600; color: var(--steel); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.stat-box.score .stat-value { color: var(--emerald); }
+.stat-box.score { border-color: var(--emerald-border); }
+.stat-box.crit .stat-value { color: var(--red); }
+.stat-box.high .stat-value { color: var(--amber); }
+.stat-box.warn .stat-value { color: var(--blue); }
+
+/* RISK BADGE */
+.risk-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid;
+}
+.risk-badge.critical { color: var(--red); border-color: var(--red-border); background: var(--red-bg); }
+.risk-badge.high { color: var(--amber); border-color: var(--amber-border); background: var(--amber-bg); }
+.risk-badge.medium { color: var(--blue); border-color: var(--blue-border); background: var(--blue-bg); }
+.risk-badge.low { color: var(--emerald); border-color: var(--emerald-border); background: var(--emerald-glow); }
+
+/* FINDINGS HEADER */
+.findings-header {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--parchment);
+    margin-bottom: 10px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.btn-export {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--emerald);
+    background: transparent;
+    border: 1px solid var(--emerald);
+    border-radius: var(--radius-sm);
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.btn-export:hover {
+    background: var(--emerald);
+    color: var(--void);
+}
+
+/* FINDINGS SCROLL */
+.findings-scroll {
+    max-height: 280px;
+    overflow-y: auto;
+    border: 1px solid var(--charcoal);
+    border-radius: var(--radius-lg);
+    background: var(--carbon);
+}
+.findings-scroll::-webkit-scrollbar { width: 5px; }
+.findings-scroll::-webkit-scrollbar-track { background: var(--carbon); }
+.findings-scroll::-webkit-scrollbar-thumb { background: var(--charcoal); border-radius: 3px; }
+.findings-scroll::-webkit-scrollbar-thumb:hover { background: var(--charcoal-light); }
+
+/* 3-COL FINDINGS GRID */
+.findings-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+.finding-card {
+    padding: 16px 18px;
+    border-right: 1px solid var(--charcoal);
+    border-bottom: 1px solid var(--charcoal);
+    min-width: 0;
+    overflow: hidden;
+}
+.finding-card:nth-child(3n) { border-right: none; }
+.f-sev {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 7px;
+    border-radius: var(--radius-sm);
+    display: inline-block;
+    margin-bottom: 8px;
+    border: 1px solid;
+}
+.f-sev.critical { color: var(--red); border-color: var(--red-border); background: var(--red-bg); }
+.f-sev.high { color: var(--amber); border-color: var(--amber-border); background: var(--amber-bg); }
+.f-sev.warning { color: var(--blue); border-color: var(--blue-border); background: var(--blue-bg); }
+.f-sev.info { color: var(--steel); border-color: var(--charcoal); background: rgba(255,255,255,0.03); }
+.f-desc { font-size: 14px; color: var(--parchment); margin-bottom: 6px; line-height: 1.4; }
+.f-meta { font-family: var(--font-mono); font-size: 12px; color: var(--steel); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.f-code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--steel);
+    margin-top: 8px;
+    padding: 6px 8px;
+    background: var(--abyss);
+    border: 1px solid var(--charcoal);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* LOADING */
+.scanning-overlay { text-align: center; padding: 56px 20px; }
+.scanning-overlay .spinner { display: inline-block; width: 32px; height: 32px; border: 2px solid var(--charcoal); border-top-color: var(--emerald); border-radius: 50%; animation: spin 0.7s linear infinite; margin-bottom: 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.scanning-overlay p { color: var(--steel); font-family: var(--font-mono); font-size: 14px; letter-spacing: 1.5px; }
+
+/* ERROR */
+.error-msg { background: var(--red-bg); border: 1px solid var(--red); border-radius: var(--radius); color: var(--red); padding: 12px 16px; font-size: 13px; font-family: var(--font-mono); margin-top: 14px; display: none; }
+
+/* ═══ FOOTER BAR ═══ */
+.footer {
+    position: relative;
+    z-index: 1;
+    background: var(--carbon);
+    border-top: 1px solid var(--charcoal);
+    padding: 14px 0;
+    flex-shrink: 0;
+}
+.footer .container {
+    text-align: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.footer-left { font-family: var(--font-mono); font-size: 12px; color: var(--parchment); }
+.footer-left a { color: var(--emerald); font-weight: 600; }
+.footer-right { font-family: var(--font-mono); font-size: 12px; color: var(--steel); }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 900px) {
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .findings-grid { grid-template-columns: repeat(2, 1fr); }
+    .finding-card:nth-child(3n) { border-right: 1px solid var(--charcoal); }
+    .finding-card:nth-child(2n) { border-right: none; }
+}
+@media (max-width: 600px) {
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .findings-grid { grid-template-columns: 1fr; }
+    .finding-card { border-right: none !important; }
+    .header, .footer { padding: 12px 0; }
+    .container { padding: 0 16px; }
+    .main { padding: 20px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HEADER BAR ═══ -->
+<header class="header">
+    <div class="container">
+        <div class="header-left">
+            <a class="header-logo" href="/"><svg class="logo-svg" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg"><path class="st0" d="M688.65,787.13H111.35c-54.39,0-98.48-44.09-98.48-98.48V111.35c0-54.39,44.09-98.48,98.48-98.48h577.29 c54.39,0,98.48,44.09,98.48,98.48v577.29C787.13,743.04,743.04,787.13,688.65,787.13z"/><path d="M666.25,351.89c0-77.87-0.19-148.09,0.16-218.3c0.07-14.47-6.86-17.12-19.63-17.08c-117.73,0.38-235.48-1.29-353.17,0.76 c-127.92,5.28-169.97,111.9-160.44,226.04c-0.94,15.71,4.55,25.68,17.35,34.97c67.53,48.98,134.45,98.83,201.51,148.46 c48.55,35.93,48.5,35.99,96.41-0.44c48.85-37.14,48.71-36.94-2.02-72.85c-10.85-7.68-20.53-13.6-31.8-1.76 c-10.83,11.38-20.22,8.1-31.65-0.56c-51.79-39.23-104.2-77.64-156.39-116.34c-6.32-4.68-12.87-8.69-14.04-17.88 c-10.52-82.14,36.55-122.22,95.81-120.24c71.08,2.38,142.31,0.57,213.47,0.57c65.75,0,65.52,0,66.07,66.24 c0.1,11.75-5.16,25.68,6.38,34.74C616.09,315.36,638.72,331.47,666.25,351.89z M133.58,448.08c0,77.21,0.32,147.39-0.24,217.57 c-0.13,16.51,8.45,18.08,21.56,18.05c116.81-0.33,233.64,0.76,350.44-0.7c127.62-4.29,171.73-112.3,161.32-225.18 c0.92-16.6-4.73-27.05-18.57-37.02c-66.25-47.72-131.68-96.59-197.19-145.34c-51.13-38.05-50.99-38.24-102.8,0.77 c-44.42,33.45-44.09,33.02,0.79,67.38c14.04,10.75,26.03,17.52,40.41,1.83c9.16-10,17.2-3.64,25.17,2.28 c52.86,39.25,105.74,78.46,158.59,117.71c6.27,4.65,13.1,8.49,14.27,17.71c9.99,78.97-33.1,122.31-95.51,120.31 c-69.32-2.22-138.76-0.5-208.14-0.51c-71.01,0-70.86-0.01-71.66-71.11c-0.12-10.86,3.77-23.05-7.88-31.51 C182.34,484.46,160.78,468.24,133.58,448.08z"/></svg> SKILLGUARD</a>
+            <div class="header-tag">v0.1.0</div>
+        </div>
+        <div class="header-right">AI ECOSYSTEM SECURITY SCANNER</div>
+    </div>
+</header>
+
+<!-- ═══ TABS ═══ -->
+<nav class="tabs">
+    <div class="container">
+        <h1 class="sr-only">{{ seo.h1 }}</h1>
+        <a class="tab active" href="/prompt-injection-scanner" data-tab="prompt">PROMPT ANALYSIS</a>
+        <a class="tab" href="/ai-skill-scanner" data-tab="file">FILE SCAN</a>
+        <a class="tab" href="/repository-security-audit" data-tab="url">URL SCAN</a>
+    </div>
+</nav>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+    <!-- PROMPT -->
+    <section class="tab-content active" id="tab-prompt" aria-labelledby="heading-prompt">
+        <h2 id="heading-prompt" class="sr-only">Prompt Analysis</h2>
+        <div class="form-group">
+            <label>Paste prompt / system message to analyze</label>
+            <textarea id="prompt-input" placeholder="Paste suspicious prompt here..."></textarea>
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="scanPrompt()">SCAN PROMPT</button>
+            <button class="btn" onclick="clearPrompt()">CLEAR</button>
+        </div>
+        <div class="results" id="prompt-results"></div>
+        <div class="error-msg" id="prompt-error"></div>
+    </section>
+
+    <!-- FILE -->
+    <section class="tab-content" id="tab-file" aria-labelledby="heading-file">
+        <h2 id="heading-file" class="sr-only">File Scan</h2>
+        <div class="form-group">
+            <label>Upload file to scan</label>
+            <div style="display:flex;gap:16px;align-items:stretch">
+                <div style="flex:2">
+                    <div class="upload-zone" id="file-drop" onclick="document.getElementById('file-input').click()" style="min-height:100px;padding:20px 24px">
+                        <p style="font-family:var(--font-mono);font-size:14px;color:var(--parchment)">Drop file here or click to browse</p>
+                        <p class="sub">.py .js .ts .sh .yaml .json .md .txt .env .zip</p>
+                    </div>
+                    <input type="file" class="file-input" id="file-input" accept=".py,.js,.ts,.jsx,.tsx,.sh,.bash,.rb,.go,.rs,.java,.php,.yaml,.yml,.json,.toml,.md,.txt,.env,.zip,.cfg">
+                </div>
+                <div style="display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:180px">
+                    <span id="file-name-display" style="font-family:var(--font-mono);font-size:12px;color:var(--emerald);text-align:center;word-break:break-all"></span>
+                    <button class="btn btn-primary" onclick="scanFile()" id="scan-file-btn" disabled style="width:100%">SCAN FILE</button>
+                </div>
+            </div>
+        </div>
+        <div class="results" id="file-results"></div>
+        <div class="error-msg" id="file-error"></div>
+    </section>
+
+    <!-- URL -->
+    <section class="tab-content" id="tab-url" aria-labelledby="heading-url">
+        <h2 id="heading-url" class="sr-only">URL Scan</h2>
+        <div class="form-group">
+            <label>GitHub / Hugging Face repository URL</label>
+            <input type="text" id="url-input" placeholder="https://github.com/user/repo or https://huggingface.co/user/model">
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="scanUrl()">SCAN URL</button>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--steel);margin-top:10px">Max repo size: 50MB. Model weights (.bin, .safetensors, .gguf) are skipped.</p>
+        <div class="results" id="url-results"></div>
+        <div class="error-msg" id="url-error"></div>
+    </section>
+</main>
+
+<!-- ═══ FOOTER BAR ═══ -->
+<footer class="footer">
+    <div class="container">
+        <span class="footer-left">&copy; 2026 <a href="https://github.com/phrixus-ai/skillguard">PHRIXUS</a> &mdash; SkillGuard v0.1.0 | <a href="https://agentlighthouse.burakgider.com" target="_blank" rel="noopener">AgentLighthouse</a></span>
+        <span class="footer-right">Built for AI Safety</span>
+    </div>
+</footer>
+
+<!-- ═══ SCRIPTS ═══ -->
+<script>
+console.log('%c SKILLGUARD v0.1.0 ','background:#00d992;color:#050507;font-size:16px;font-weight:bold;padding:8px 16px');
+console.log('%c AI Ecosystem Security Scanner ','color:#00d992;font-size:13px');
+console.log('%c You found the console. Nice. ','color:#8b949e;font-size:12px');
+console.log('%c → Source: https://github.com/phrixus-ai/skillguard ','color:#8b949e;font-size:11px');
+console.log('');
+console.log('%c 🔥 Also check out AgentLighthouse ','background:#ff6b2b;color:#050507;font-size:13px;font-weight:bold;padding:6px 12px');
+console.log('%c AI & Agent Readiness Scanner — is YOUR site AI-ready? ','color:#ff6b2b;font-size:12px');
+console.log('%c → https://agentlighthouse.burakgider.com ','color:#8b949e;font-size:11px');
+console.log('');
+console.log('%c → Stay curious. Stay safe. ','color:#f2f2f2;font-size:12px;font-weight:bold');
+console.log('');
+
+function switchTab(tabName,pushUrl,skipTitle){
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));
+    const tab=document.querySelector('.tab[data-tab="'+tabName+'"]');
+    const content=document.getElementById('tab-'+tabName);
+    if(tab)tab.classList.add('active');
+    if(content)content.classList.add('active');
+    if(pushUrl!==false){
+        const pathMap={prompt:'/prompt-injection-scanner',file:'/ai-skill-scanner',url:'/repository-security-audit'};
+        history.pushState({tab:tabName},'',pathMap[tabName]);
+    }
+    if(!skipTitle){
+        const titleMap={'prompt':'Prompt Injection Scanner — SkillGuard','file':'AI Skill Security Scanner — SkillGuard','url':'Repository Security Audit — SkillGuard'};
+        document.title=titleMap[tabName]||'SkillGuard — AI Security Scanner';
+    }
+}
+// Click handlers — user-initiated, always push URL + update title
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',e=>{e.preventDefault();switchTab(t.dataset.tab,true,false);}));
+// Init from server-side active_tab — NO pushState, NO title override (server sets correct title)
+(function(){const t='{{ active_tab }}';if(t&&t!=='None'&&t!==''){switchTab(t,false,true);}else{switchTab('prompt',false,true);}})();
+// Back/forward button
+window.addEventListener('popstate',()=>{const pathMap={'/prompt-injection-scanner':'prompt','/ai-skill-scanner':'file','/repository-security-audit':'url'};const p=location.pathname;const tab=pathMap[p]||'prompt';document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));const el=document.querySelector('.tab[data-tab="'+tab+'"]');if(el)el.classList.add('active');const c=document.getElementById('tab-'+tab);if(c)c.classList.add('active');const titleMap={'prompt':'Prompt Injection Scanner — SkillGuard','file':'AI Skill Security Scanner — SkillGuard','url':'Repository Security Audit — SkillGuard'};document.title=titleMap[tab]||'SkillGuard — AI Security Scanner';});
+
+let selectedFile=null;
+const fileDrop=document.getElementById('file-drop');
+const fileInput=document.getElementById('file-input');
+fileInput.addEventListener('change',e=>{if(e.target.files.length){selectedFile=e.target.files[0];document.getElementById('scan-file-btn').disabled=false;document.getElementById('file-name-display').textContent=selectedFile.name;}});
+fileDrop.addEventListener('dragover',e=>{e.preventDefault();fileDrop.style.borderColor='var(--emerald)';fileDrop.style.background='var(--emerald-glow)';});
+fileDrop.addEventListener('dragleave',()=>{fileDrop.style.borderColor='';fileDrop.style.background='';});
+fileDrop.addEventListener('drop',e=>{e.preventDefault();fileDrop.style.borderColor='';fileDrop.style.background='';if(e.dataTransfer.files.length){selectedFile=e.dataTransfer.files[0];document.getElementById('scan-file-btn').disabled=false;document.getElementById('file-name-display').textContent=selectedFile.name;}});
+
+function clearPrompt(){document.getElementById('prompt-input').value='';document.getElementById('prompt-results').classList.remove('visible');document.getElementById('prompt-results').innerHTML='';}
+
+async function scanPrompt(){const c=document.getElementById('prompt-input').value;if(!c){showError('prompt-error','Enter prompt text to analyze');return;}hideError('prompt-error');showLoading('prompt-results');try{const r=await fetch('/api/scan/prompt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:c})});const d=await r.json();if(d.error){showError('prompt-error',d.error);hideR('prompt-results');return;}renderResults('prompt-results',d);}catch(e){showError('prompt-error','Request failed: '+e.message);hideR('prompt-results');}}
+async function scanFile(){if(!selectedFile)return;hideError('file-error');showLoading('file-results');const fd=new FormData();fd.append('file',selectedFile);try{const r=await fetch('/api/scan/file',{method:'POST',body:fd});const d=await r.json();if(d.error){showError('file-error',d.error);hideR('file-results');return;}renderResults('file-results',d);}catch(e){showError('file-error','Request failed: '+e.message);hideR('file-results');}}
+async function scanUrl(){const u=document.getElementById('url-input').value.trim();if(!u){showError('url-error','Enter a repository URL');return;}hideError('url-error');showLoading('url-results');try{const r=await fetch('/api/scan/url',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})});const d=await r.json();if(d.error){showError('url-error',d.error);hideR('url-results');return;}renderResults('url-results',d);}catch(e){showError('url-error','Request failed: '+e.message);hideR('url-results');}}
+
+function showLoading(id){const el=document.getElementById(id);el.innerHTML='<div class="scanning-overlay"><div class="spinner"></div><p>SCANNING...</p></div>';el.classList.add('visible');}
+function hideR(id){document.getElementById(id).classList.remove('visible');}
+
+function renderResults(tid,data){
+    const el=document.getElementById(tid);
+    const rl=(data.risk_level||'LOW').toLowerCase();
+    const cc=data.critical_count||0,hc=data.high_count||0,wc=data.warning_count||0,fs=data.files_scanned||1;
+    let h='<div class="stats-grid">';
+    const scoreColor=data.risk_score>=80?'var(--red-border)':data.risk_score>=50?'var(--amber-border)':'var(--emerald-border)';
+    h+='<div class="stat-box score" style="border-color:'+scoreColor+'"><div class="stat-value" style="color:'+(data.risk_score>=80?'var(--red)':data.risk_score>=50?'var(--amber)':'var(--emerald)')+'">'+data.risk_score+'</div><div class="stat-label">Risk Score</div></div>';
+    h+='<div class="stat-box"><div class="stat-value"><span class="risk-badge '+rl+'">'+data.risk_level+'</span></div><div class="stat-label">Risk Level</div></div>';
+    h+='<div class="stat-box crit"><div class="stat-value">'+cc+'</div><div class="stat-label">Critical</div></div>';
+    h+='<div class="stat-box high"><div class="stat-value">'+hc+'</div><div class="stat-label">High</div></div>';
+    h+='<div class="stat-box warn"><div class="stat-value">'+wc+'</div><div class="stat-label">Warning</div></div>';
+    h+='<div class="stat-box"><div class="stat-value">'+fs+'</div><div class="stat-label">Files</div></div>';
+    h+='</div>';
+    const findings=data.findings||[];
+    h+='<div class="findings-header"><span>'+findings.length+' FINDINGS</span><button class="btn-export" onclick="exportJSON(\''+tid+'\')">&#8595; Export JSON</button></div>';
+    h+='<div class="findings-scroll"><div class="findings-grid">';
+    findings.forEach(f=>{const s=(f.severity||'info').toLowerCase();h+='<div class="finding-card"><span class="f-sev '+s+'">'+f.severity+'</span><div class="f-desc">'+f.description+'</div><div class="f-meta">'+f.category+' &middot; '+f.file+' : line '+f.line+'</div><div class="f-code">'+esc(f.line_content)+'</div></div>';});
+    h+='</div></div>';
+    el.innerHTML=h;el.classList.add('visible');
+}
+function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+const _scanStore={};
+const _origRender=renderResults;
+renderResults=function(id,data){_scanStore[id]=data;_origRender(id,data);};
+function exportJSON(id){const d=_scanStore[id];if(!d)return;const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='skillguard-report-'+Date.now()+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);}
+function showError(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
+function hideError(id){document.getElementById(id).style.display='none';}
+</script>
+</body>
+</html>

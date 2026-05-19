@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <title>SkillGuard — Admin Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --abyss: #050507; --carbon: #101010; --charcoal: #3d3a39;
+            --emerald: #00d992; --emerald-glow: rgba(0,217,146,0.15);
+            --snow: #f2f2f2; --steel: #8b949e; --red: #fb565b;
+            --font-body: 'Inter', system-ui, sans-serif;
+            --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-body);
+            background: var(--abyss);
+            color: var(--snow);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            background: var(--carbon);
+            border: 1px solid var(--charcoal);
+            border-radius: 8px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 360px;
+        }
+        .login-card h2 {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--emerald);
+            margin-bottom: 8px;
+        }
+        .login-card p {
+            font-size: 14px;
+            color: var(--steel);
+            margin-bottom: 24px;
+        }
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--abyss);
+            border: 1px solid var(--charcoal);
+            border-radius: 6px;
+            color: var(--snow);
+            font-family: var(--font-mono);
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+        input[type="password"]:focus {
+            outline: none;
+            border-color: var(--emerald);
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background: var(--emerald);
+            color: var(--abyss);
+            border: 1px solid var(--emerald);
+            border-radius: 6px;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn:hover { background: #2fd6a1; }
+        .error {
+            background: rgba(251,86,91,0.1);
+            border: 1px solid rgba(251,86,91,0.3);
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: var(--red);
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <h2>🛡️ SkillGuard Admin</h2>
+        <p>Enter password to access dashboard</p>
+        {% if error %}
+        <div class="error">Incorrect password</div>
+        {% endif %}
+        <form method="POST" action="/admin/login">
+            <input type="password" name="password" placeholder="Password" autofocus>
+            <button class="btn" type="submit">LOGIN</button>
+        </form>
+    </div>
+</body>
+</html>
