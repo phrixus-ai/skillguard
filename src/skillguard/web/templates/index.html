@@ -802,7 +802,7 @@ function renderResults(tid,data){
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 const _scanStore={};
 const _origRender=renderResults;
-function renderResults=function(id,data){_scanStore[id]=data;_origRender(id,data);};
+renderResults=function(id,data){_scanStore[id]=data;_origRender(id,data);};
 function renderMcpResults(data){
     _scanStore['mcp-results']=data;
     const el=document.getElementById('mcp-results');

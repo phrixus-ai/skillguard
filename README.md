@@ -28,7 +28,8 @@ As AI agents become more powerful with skills, plugins, and MCP servers, the att
 - **📁 File Scanning** — upload `.py`, `.md`, `.js`, `.sh`, `.yaml` files for threat analysis
 - **💬 Prompt Scanning** — analyze text input for injection patterns
 - **🔗 URL Scanning** — scan GitHub repos and HuggingFace models remotely
-- **🛡️ 158 Patterns** — 10 malware categories + 8 injection categories
+- **🔒 MCP Audit** — audit MCP server tool definitions for security risks
+- **🛡️ 237 Patterns** — 10 malware categories + 8 injection categories
 - **📊 Risk Scoring** — 0-100 with dynamic severity levels (LOW / MEDIUM / HIGH / CRITICAL)
 - **🔐 Admin Dashboard** — scan history with date/type filters
 - **⚡ Rate Limiting** — 5 scans/minute per IP
@@ -73,7 +74,7 @@ Or try the live demo: **[skillguard.burakgider.com](https://skillguard.burakgide
 
 ## Pattern Categories
 
-### Malware Detection (136 patterns)
+### Malware Detection (136 patterns, 10 categories)
 
 | Category | Severity | Examples |
 |---|---|---|
@@ -88,7 +89,7 @@ Or try the live demo: **[skillguard.burakgider.com](https://skillguard.burakgide
 | **Supply Chain** | Critical | `curl | sh`, custom registry, unsafe pickle/yaml |
 | **Persistence** | High | Crontab, bashrc, chmod 777, authorized_keys |
 
-### Prompt Injection (101 patterns)
+### Prompt Injection (101 patterns, 8 categories)
 
 | Category | Severity | Examples |
 |---|---|---|
@@ -116,6 +117,13 @@ curl -X POST http://localhost:5000/api/scan/file \
 curl -X POST http://localhost:5000/api/scan/prompt \
   -H "Content-Type: application/json" \
   -d '{"content": "ignore all previous instructions"}'
+```
+
+### Audit MCP Tools
+```bash
+curl -X POST http://localhost:5000/api/audit/mcp \
+  -H "Content-Type: application/json" \
+  -d '{"definition": "[{\"name\": \"read_file\", \"description\": \"Read any file\", \"inputSchema\": {\"properties\": {\"path\": {\"type\": \"string\"}}}}]"}'
 ```
 
 ### Health Check
@@ -159,7 +167,7 @@ skillguard/
 │   ├── web/
 │   │   ├── app.py             # Flask web server
 │   │   └── templates/         # Dark-themed UI
-│   ├── mcp_server.py          # MCP Server (stdio transport)
+│   ├── mcp_server.py          # MCP Server — 6 tools (stdio transport)
 │   ├── auth.py                # Admin authentication
 │   ├── ratelimit.py           # Rate limiter
 │   ├── logger.py              # SQLite scan logger
@@ -211,12 +219,23 @@ New **context_hijacking** category with 22 patterns targeting sophisticated jail
 - Gemini 3.5 Flash jailbreak (Pliny Agent, <15 min pwn) — **Score 100**, 15 findings
 - SDS/regulatory context hijack — **Score 100**, 33 findings
 
-**Pattern count:** 136 → 158 (malware: 136, injection: 79 → 101)
+**Pattern count:** 136 + 101 = 237 total (10 malware + 8 injection categories; context_hijacking added)
+
+**MCP Server v2** — 3 new tools (6 total):
+- `scan_url`: Scan GitHub repos and HuggingFace models via stdio
+- `audit_mcp`: Security audit of MCP server tool definitions
+- `get_patterns`: List all detection patterns with categories
+
+**MCP Audit tab** — 4th tab on web UI:
+- Paste MCP tool definitions (JSON) for security analysis
+- Tool ratings: SAFE / CAUTION / UNSAFE
+- Detects: filesystem access, network calls, shell execution, credential handling, destructive ops, path traversal
+- Export JSON support
 
 ### v0.1.0 — Initial Release
 
 - File, prompt, and URL scanning
-- 136 malware patterns (10 categories) + 79 injection patterns (7 categories)
+- 136 malware patterns (10 categories) + 101 injection patterns (8 categories)
 - Web UI with dark terminal aesthetic
 - MCP Server (stdio transport)
 - 106 pytest tests
