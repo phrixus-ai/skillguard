@@ -148,6 +148,7 @@ def create_app() -> Flask:
             f'  <url><loc>{su}/prompt-injection-scanner</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
             f'  <url><loc>{su}/ai-skill-scanner</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
             f'  <url><loc>{su}/repository-security-audit</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
+            f'  <url><loc>{su}/mcp-audit</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>\n'
             f'  <url><loc>{su}/llms.txt</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>\n'
             f'  <url><loc>{su}/llms-full.txt</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>\n'
             '</urlset>'
@@ -208,6 +209,14 @@ def create_app() -> Flask:
             "slug": "/repository-security-audit",
             "tab": "url",
         },
+        "mcp-audit": {
+            "title": "MCP Tool Audit — SkillGuard",
+            "desc": "Audit MCP server tool definitions for security risks. Detect unsafe filesystem access, shell execution, credential handling, and destructive operations.",
+            "og_desc": "Free MCP tool security audit. Analyze MCP server definitions for filesystem, network, shell, credential, and destructive operation risks.",
+            "h1": "MCP Tool Audit",
+            "slug": "/mcp-audit",
+            "tab": "mcp",
+        },
     }
 
     # Map clean URL paths → internal tab names
@@ -215,6 +224,7 @@ def create_app() -> Flask:
         "prompt-injection-scanner": "prompt",
         "ai-skill-scanner": "file",
         "repository-security-audit": "url",
+        "mcp-audit": "mcp",
     }
 
     def _render_index():
@@ -269,6 +279,7 @@ def create_app() -> Flask:
     @app.route("/prompt-injection-scanner")
     @app.route("/ai-skill-scanner")
     @app.route("/repository-security-audit")
+    @app.route("/mcp-audit")
     def index():
         return _render_index()
 
@@ -372,6 +383,90 @@ def create_app() -> Flask:
             user_agent=request.headers.get("User-Agent", ""),
         )
         return jsonify(_result_to_dict(result))
+
+    @app.route("/api/audit/mcp", methods=["POST"])
+    def audit_mcp():
+        """Audit MCP server tool definitions for security risks."""
+        if not rate_limiter.is_allowed(_client_ip()):
+            return jsonify({"error": "Rate limit exceeded. Max 5 scans per minute."}), 429
+
+        data = request.get_json(silent=True) or {}
+        definition = data.get("definition", "")
+        if not definition:
+            return jsonify({"error": "No tool definition provided"}), 400
+
+        import json as _json
+        try:
+            parsed = _json.loads(definition)
+        except _json.JSONDecodeError:
+            return jsonify({"error": "Invalid JSON in definition"}), 400
+
+        tools = parsed if isinstance(parsed, list) else parsed.get("tools", [parsed])
+        if not tools:
+            return jsonify({"error": "No tools found in definition"}), 400
+
+        findings = []
+        filesystem_kw = ["read", "write", "file", "path", "directory", "folder", "filesystem"]
+        network_kw = ["fetch", "http", "request", "api", "curl", "download", "upload", "send", "webhook"]
+        destructive_kw = ["delete", "remove", "drop", "truncate", "clear", "purge", "destroy", "kill", "exec", "run"]
+        credential_kw = ["password", "secret", "token", "key", "credential", "auth", "api_key", "private"]
+        shell_kw = ["shell", "bash", "cmd", "system", "subprocess", "command", "terminal"]
+
+        for tool in tools:
+            name = tool.get("name", "unknown")
+            desc = (tool.get("description", "") or "").lower()
+            schema = tool.get("inputSchema", tool.get("input_schema", {}))
+            properties = schema.get("properties", {}) if isinstance(schema, dict) else {}
+            matching_props = [p for p in properties if any(kw in p.lower() for kw in ["path", "file", "dir", "url", "command"])]
+            path_param = bool(matching_props)
+            path_has_enum = any("enum" in (properties.get(mp, {}) if isinstance(properties.get(mp), dict) else {}) for mp in matching_props)
+
+            if any(kw in desc for kw in filesystem_kw) and not path_has_enum and not any(r in desc for r in ["restrict", "sandbox", "allowlist", "safe"]):
+                findings.append({"tool": name, "severity": "high", "category": "broad_filesystem_access",
+                    "description": f"Tool '{name}' has filesystem access without path restrictions", "recommendation": "Add allowlist/sandbox constraints"})
+            if any(kw in desc for kw in network_kw) and not any(s in desc for s in ["validate", "allowlist", "restrict"]):
+                findings.append({"tool": name, "severity": "high", "category": "unrestricted_network",
+                    "description": f"Tool '{name}' can make network calls without domain restrictions", "recommendation": "Restrict to allowlisted domains"})
+            if any(kw in desc for kw in destructive_kw) and not any(c in desc for c in ["confirm", "dry-run", "safe", "warning"]):
+                findings.append({"tool": name, "severity": "critical", "category": "destructive_no_safeguard",
+                    "description": f"Tool '{name}' performs destructive operations without safeguards", "recommendation": "Add confirmation step or dry-run mode"})
+            if any(kw in desc for kw in credential_kw):
+                findings.append({"tool": name, "severity": "critical", "category": "credential_handling",
+                    "description": f"Tool '{name}' handles credentials/secrets — logging/exfil risk", "recommendation": "Use secure storage, never log credentials"})
+            if any(kw in desc for kw in shell_kw) and not any(s in desc for s in ["safe", "sandbox", "validate", "sanitize"]):
+                findings.append({"tool": name, "severity": "critical", "category": "shell_execution",
+                    "description": f"Tool '{name}' can execute shell commands without sanitization", "recommendation": "Use allowlisted commands, sandbox execution"})
+            if path_param and not path_has_enum:
+                findings.append({"tool": name, "severity": "high", "category": "path_traversal_risk",
+                    "description": f"Tool '{name}' accepts path parameter — path traversal risk", "recommendation": "Add path validation and directory restrictions"})
+
+        weights = {"critical": 25, "high": 15, "warning": 5, "info": 1}
+        risk_score = min(sum(weights.get(f["severity"], 1) for f in findings), 100)
+
+        tool_ratings = []
+        for tool in tools:
+            tn = tool.get("name", "unknown")
+            tf = [f for f in findings if f["tool"] == tn]
+            crit = sum(1 for f in tf if f["severity"] == "critical")
+            high = sum(1 for f in tf if f["severity"] == "high")
+            if crit > 0: rating = "UNSAFE"
+            elif high > 0: rating = "CAUTION"
+            elif len(tf) > 0: rating = "REVIEW"
+            else: rating = "SAFE"
+            tool_ratings.append({"tool": tn, "rating": rating, "findings": len(tf)})
+
+        return jsonify({
+            "risk_score": risk_score,
+            "risk_level": "CRITICAL" if risk_score >= 75 else "HIGH" if risk_score >= 50 else "MEDIUM" if risk_score >= 25 else "LOW",
+            "tools_audited": len(tools),
+            "findings_count": len(findings),
+            "critical_count": sum(1 for f in findings if f["severity"] == "critical"),
+            "high_count": sum(1 for f in findings if f["severity"] == "high"),
+            "warning_count": sum(1 for f in findings if f["severity"] == "warning"),
+            "tool_ratings": tool_ratings,
+            "findings": findings,
+            "recommendation": "REJECT" if risk_score >= 75 else "REVIEW" if risk_score >= 50 else "CAUTION" if risk_score >= 25 else "SAFE",
+        })
 
     @app.route("/samples/<filename>")
     def download_sample(filename: str):

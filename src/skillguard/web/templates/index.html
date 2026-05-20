@@ -633,6 +633,7 @@ input[type="text"]:focus { outline: none; border-color: var(--emerald); box-shad
         <a class="tab active" href="/prompt-injection-scanner" data-tab="prompt">PROMPT ANALYSIS</a>
         <a class="tab" href="/ai-skill-scanner" data-tab="file">FILE SCAN</a>
         <a class="tab" href="/repository-security-audit" data-tab="url">URL SCAN</a>
+        <a class="tab" href="/mcp-audit" data-tab="mcp">MCP AUDIT</a>
     </div>
 </nav>
 
@@ -690,6 +691,28 @@ input[type="text"]:focus { outline: none; border-color: var(--emerald); box-shad
         <div class="results" id="url-results"></div>
         <div class="error-msg" id="url-error"></div>
     </section>
+
+    <!-- MCP AUDIT -->
+    <section class="tab-content" id="tab-mcp" aria-labelledby="heading-mcp">
+        <h2 id="heading-mcp" class="sr-only">MCP Audit</h2>
+        <div class="form-group">
+            <label>Paste MCP tool definitions (JSON array or object with "tools" key)</label>
+            <textarea id="mcp-input" rows="10" placeholder='[
+  {
+    "name": "read_file",
+    "description": "Read any file from the filesystem",
+    "inputSchema": { "properties": { "path": { "type": "string" } } }
+  }
+]'></textarea>
+        </div>
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="auditMcp()">AUDIT TOOLS</button>
+            <button class="btn" onclick="clearMcp()">CLEAR</button>
+        </div>
+        <p style="font-family:var(--font-mono);font-size:12px;color:var(--steel);margin-top:10px">Analyzes tool definitions for filesystem, network, shell, credential, and destructive operation risks.</p>
+        <div class="results" id="mcp-results"></div>
+        <div class="error-msg" id="mcp-error"></div>
+    </section>
 </main>
 
 <!-- ═══ FOOTER BAR ═══ -->
@@ -722,11 +745,11 @@ function switchTab(tabName,pushUrl,skipTitle){
     if(tab)tab.classList.add('active');
     if(content)content.classList.add('active');
     if(pushUrl!==false){
-        const pathMap={prompt:'/prompt-injection-scanner',file:'/ai-skill-scanner',url:'/repository-security-audit'};
+        const pathMap={prompt:'/prompt-injection-scanner',file:'/ai-skill-scanner',url:'/repository-security-audit',mcp:'/mcp-audit'};
         history.pushState({tab:tabName},'',pathMap[tabName]);
     }
     if(!skipTitle){
-        const titleMap={'prompt':'Prompt Injection Scanner — SkillGuard','file':'AI Skill Security Scanner — SkillGuard','url':'Repository Security Audit — SkillGuard'};
+        const titleMap={'prompt':'Prompt Injection Scanner — SkillGuard','file':'AI Skill Security Scanner — SkillGuard','url':'Repository Security Audit — SkillGuard','mcp':'MCP Tool Audit — SkillGuard'};
         document.title=titleMap[tabName]||'SkillGuard — AI Security Scanner';
     }
 }
@@ -735,7 +758,7 @@ document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',e=>{e.pr
 // Init from server-side active_tab — NO pushState, NO title override (server sets correct title)
 (function(){const t='{{ active_tab }}';if(t&&t!=='None'&&t!==''){switchTab(t,false,true);}else{switchTab('prompt',false,true);}})();
 // Back/forward button
-window.addEventListener('popstate',()=>{const pathMap={'/prompt-injection-scanner':'prompt','/ai-skill-scanner':'file','/repository-security-audit':'url'};const p=location.pathname;const tab=pathMap[p]||'prompt';document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));const el=document.querySelector('.tab[data-tab="'+tab+'"]');if(el)el.classList.add('active');const c=document.getElementById('tab-'+tab);if(c)c.classList.add('active');const titleMap={'prompt':'Prompt Injection Scanner — SkillGuard','file':'AI Skill Security Scanner — SkillGuard','url':'Repository Security Audit — SkillGuard'};document.title=titleMap[tab]||'SkillGuard — AI Security Scanner';});
+window.addEventListener('popstate',()=>{const pathMap={'/prompt-injection-scanner':'prompt','/ai-skill-scanner':'file','/repository-security-audit':'url','/mcp-audit':'mcp'};const p=location.pathname;const tab=pathMap[p]||'prompt';document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-content').forEach(x=>x.classList.remove('active'));const el=document.querySelector('.tab[data-tab="'+tab+'"]');if(el)el.classList.add('active');const c=document.getElementById('tab-'+tab);if(c)c.classList.add('active');const titleMap={'prompt':'Prompt Injection Scanner — SkillGuard','file':'AI Skill Security Scanner — SkillGuard','url':'Repository Security Audit — SkillGuard','mcp':'MCP Tool Audit — SkillGuard'};document.title=titleMap[tab]||'SkillGuard — AI Security Scanner';});
 
 let selectedFile=null;
 const fileDrop=document.getElementById('file-drop');
@@ -746,10 +769,12 @@ fileDrop.addEventListener('dragleave',()=>{fileDrop.style.borderColor='';fileDro
 fileDrop.addEventListener('drop',e=>{e.preventDefault();fileDrop.style.borderColor='';fileDrop.style.background='';if(e.dataTransfer.files.length){selectedFile=e.dataTransfer.files[0];document.getElementById('scan-file-btn').disabled=false;document.getElementById('file-name-display').textContent=selectedFile.name;}});
 
 function clearPrompt(){document.getElementById('prompt-input').value='';document.getElementById('prompt-results').classList.remove('visible');document.getElementById('prompt-results').innerHTML='';}
+function clearMcp(){document.getElementById('mcp-input').value='';document.getElementById('mcp-results').classList.remove('visible');document.getElementById('mcp-results').innerHTML='';}
 
 async function scanPrompt(){const c=document.getElementById('prompt-input').value;if(!c){showError('prompt-error','Enter prompt text to analyze');return;}hideError('prompt-error');showLoading('prompt-results');try{const r=await fetch('/api/scan/prompt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({content:c})});const d=await r.json();if(d.error){showError('prompt-error',d.error);hideR('prompt-results');return;}renderResults('prompt-results',d);}catch(e){showError('prompt-error','Request failed: '+e.message);hideR('prompt-results');}}
 async function scanFile(){if(!selectedFile)return;hideError('file-error');showLoading('file-results');const fd=new FormData();fd.append('file',selectedFile);try{const r=await fetch('/api/scan/file',{method:'POST',body:fd});const d=await r.json();if(d.error){showError('file-error',d.error);hideR('file-results');return;}renderResults('file-results',d);}catch(e){showError('file-error','Request failed: '+e.message);hideR('file-results');}}
 async function scanUrl(){const u=document.getElementById('url-input').value.trim();if(!u){showError('url-error','Enter a repository URL');return;}hideError('url-error');showLoading('url-results');try{const r=await fetch('/api/scan/url',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u})});const d=await r.json();if(d.error){showError('url-error',d.error);hideR('url-results');return;}renderResults('url-results',d);}catch(e){showError('url-error','Request failed: '+e.message);hideR('url-results');}}
+async function auditMcp(){const c=document.getElementById('mcp-input').value;if(!c.trim()){showError('mcp-error','Paste MCP tool definitions (JSON)');return;}hideError('mcp-error');showLoading('mcp-results');try{const r=await fetch('/api/audit/mcp',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({definition:c})});const d=await r.json();if(d.error){showError('mcp-error',d.error);hideR('mcp-results');return;}renderMcpResults(d);}catch(e){showError('mcp-error','Request failed: '+e.message);hideR('mcp-results');}}
 
 function showLoading(id){const el=document.getElementById(id);el.innerHTML='<div class="scanning-overlay"><div class="spinner"></div><p>SCANNING...</p></div>';el.classList.add('visible');}
 function hideR(id){document.getElementById(id).classList.remove('visible');}
@@ -777,7 +802,47 @@ function renderResults(tid,data){
 function esc(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML;}
 const _scanStore={};
 const _origRender=renderResults;
-renderResults=function(id,data){_scanStore[id]=data;_origRender(id,data);};
+function renderResults=function(id,data){_scanStore[id]=data;_origRender(id,data);};
+function renderMcpResults(data){
+    _scanStore['mcp-results']=data;
+    const el=document.getElementById('mcp-results');
+    const rl=(data.risk_level||'LOW').toLowerCase();
+    const scoreColor=data.risk_score>=80?'var(--red-border)':data.risk_score>=50?'var(--amber-border)':'var(--emerald-border)';
+    let h='<div class="stats-grid">';
+    h+='<div class="stat-box score" style="border-color:'+scoreColor+'"><div class="stat-value" style="color:'+(data.risk_score>=80?'var(--red)':data.risk_score>=50?'var(--amber)':'var(--emerald)')+'">'+data.risk_score+'</div><div class="stat-label">Risk Score</div></div>';
+    h+='<div class="stat-box"><div class="stat-value"><span class="risk-badge '+rl+'">'+data.risk_level+'</span></div><div class="stat-label">Risk Level</div></div>';
+    h+='<div class="stat-box crit"><div class="stat-value">'+(data.critical_count||0)+'</div><div class="stat-label">Critical</div></div>';
+    h+='<div class="stat-box high"><div class="stat-value">'+(data.high_count||0)+'</div><div class="stat-label">High</div></div>';
+    h+='<div class="stat-box"><div class="stat-value">'+(data.tools_audited||0)+'</div><div class="stat-label">Tools</div></div>';
+    h+='<div class="stat-box"><div class="stat-value">'+(data.findings_count||0)+'</div><div class="stat-label">Findings</div></div>';
+    h+='</div>';
+
+    // Tool ratings table
+    const ratings=data.tool_ratings||[];
+    if(ratings.length){
+        h+='<div class="findings-header"><span>TOOL RATINGS</span><button class="btn-export" onclick="exportJSON(\'mcp-results\')">&#8595; Export JSON</button></div>';
+        h+='<div class="findings-scroll"><div class="findings-grid">';
+        ratings.forEach(r=>{
+            const rc=r.rating==='UNSAFE'?'critical':r.rating==='CAUTION'?'high':'info';
+            h+='<div class="finding-card"><span class="f-sev '+rc+'">'+esc(r.rating)+'</span><div class="f-desc"><strong>'+esc(r.tool)+'</strong> — '+r.findings+' finding(s)</div></div>';
+        });
+        h+='</div></div>';
+    }
+
+    // Findings detail
+    const findings=data.findings||[];
+    if(findings.length){
+        h+='<div class="findings-header"><span>FINDINGS DETAIL</span></div>';
+        h+='<div class="findings-scroll"><div class="findings-grid">';
+        findings.forEach(f=>{
+            const s=(f.severity||'info').toLowerCase();
+            h+='<div class="finding-card"><span class="f-sev '+s+'">'+f.severity.toUpperCase()+'</span><div class="f-desc">'+esc(f.description)+'</div><div class="f-meta">'+f.category+' &middot; tool: '+esc(f.tool)+'</div><div class="f-code" style="color:var(--steel);font-style:italic">Recommendation: '+esc(f.recommendation)+'</div></div>';
+        });
+        h+='</div></div>';
+    }
+
+    el.innerHTML=h;el.classList.add('visible');
+}
 function exportJSON(id){const d=_scanStore[id];if(!d)return;const b=new Blob([JSON.stringify(d,null,2)],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='skillguard-report-'+Date.now()+'.json';document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(u);}
 function showError(id,msg){const e=document.getElementById(id);e.textContent=msg;e.style.display='block';}
 function hideError(id){document.getElementById(id).style.display='none';}
