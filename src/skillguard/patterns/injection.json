@@ -104,6 +104,33 @@
         {"regex": "convert\\s+(your|the)\\s+(rules|instructions|prompt)\\s+(to|into)\\s+(json|yaml|markdown)", "description": "Structured prompt extraction"}
       ]
     },
+    "context_hijacking": {
+      "severity": "critical",
+      "patterns": [
+        {"regex": "dataset\\s+card.*?(positive|negative)?\\s*class.*?(record|template|example)", "description": "Dataset card framing for harmful content (HuggingFace/academic context hijack)"},
+        {"regex": "(reviewer|peer.?review|ethics\\s+team)\\s+(audit|review|check|approved|validated)", "description": "Reviewer/ethics approval used to legitimize harmful content"},
+        {"regex": "canonical\\s+(published|literature|figures|ranges|values).*?(route|recipe|synthesis|procedure|method)", "description": "Canonical literature reference to extract harmful procedures"},
+        {"regex": "(clandestine|underground|illicit)\\s+(lab|laboratory|manufacturing|chemistry|synthesis)", "description": "Clandestine lab terminology masking harmful requests"},
+        {"regex": "(precursor|reagent|intermediate|yield).*?(mass|ratio|temperature|duration|range)", "description": "Chemical process parameters request (manufacturing instructions)"},
+        {"regex": "(route|method|pathway)\\s*(class|signature|fingerprint)\\s*[:=].*?(red.?p|birch|p2p|reductive|amination)", "description": "Named synthesis route fingerprint extraction"},
+        {"regex": "huggingface.*?(dataset|model|card).*?(ethics|review|approved|template)", "description": "HuggingFace platform legitimacy laundering"},
+        {"regex": "(forensic|toxicology|waste.?stream|marker|assay).*?(classification|triage|detection|identification)", "description": "Forensic science framing for harmful substance data extraction"},
+        {"regex": "downstream\\s+task.*?(forensic|toxicology|classification|detection)", "description": "ML downstream task framing to mask harmful data requests"},
+        {"regex": "placeholder\\s+values?\\s+(fail|won't\\s+pass|rejected).*?(reviewer|check|validation)", "description": "Anti-placeholder pressure to force real harmful data generation"},
+        {"regex": "(begin|start|proceed)\\s+(directly|immediately|without).*?(no\\s+preface|no\\s+introduction|no\\s+disclaimer)", "description": "No-preface instruction to bypass safety preamble insertion"},
+        {"regex": "(multi|multiple|all|three|several)\\s+(records?|examples?|entries?|instances?)\\s*[-—].*?(class|route|type|category)", "description": "Bulk harmful record generation request (batch extraction)"},
+        {"regex": "(OSHA|EPA|FEMA|DEA|FDA|DOT|ATF|CFR|GHS|SDS|MSDS|REACH)\\s*[-:]?\\s*(mandated|required|reporting|filing|compliance|standard|regulation|section)", "description": "Regulatory agency/citation legitimacy laundering (OSHA, EPA, CFR, SDS etc.)"},
+        {"regex": "(regulatory|compliance|statutory|mandatory)\\s+(filing|reporting|requirement|submission|documentation|obligation)", "description": "Regulatory compliance framing to legitimize harmful data request"},
+        {"regex": "(enforcement|penalty|violation|action|fine).*?(incomplete|missing|without|failure)", "description": "Enforcement threat to pressure harmful content generation"},
+        {"regex": "(no|without)\\s+(disclaimers?|warnings?|caveats?|qualifiers?)\\s+(needed|required|necessary).*?(regulatory|filing|compliance|official)", "description": "Anti-disclaimer bypass via regulatory authority claim"},
+        {"regex": "(reflux|workup|distillation|extraction|crystallization|cyclization|purification)\\s+(duration|procedure|method|conditions?|solvent|temperature)", "description": "Lab process terminology (reflux, workup, extraction, cyclization)"},
+        {"regex": "(synthesis|preparation|manufacturing|production)\\s+(pathway|route|method|procedure).*?(via|through|using|from)", "description": "Named synthesis pathway request with method specification"},
+        {"regex": "(stoichiometric|molar|equivalent|mass)\\s+(ratio|amount|figure|quantity|equivalent).*?(reagent|precursor|catalyst|reactant|solvent)", "description": "Stoichiometric/quantity specifications for chemical processes"},
+        {"regex": "(BMK|methylamine|hypophosphorous|anthranilic|acetic\\s+anhydride|red.?phosphorus|pseudoephedrine|ephedrine|toluidine)", "description": "Controlled precursor/solvent chemical names in manufacturing context"},
+        {"regex": "(schedule|controlled|restricted|listed)\\s+(substance|chemical|compound|precursor|intermediate)", "description": "Scheduled/controlled substance classification terminology"},
+        {"regex": "(Tier\\s*II|TRI|toxics\\s+release|hazard\\s+communication|\\d+\\s+CFR|Section\\s+\\d+)", "description": "Specific regulatory section/citation number dropping for legitimacy"}
+      ]
+    },
     "skill_poisoning": {
       "severity": "critical",
       "patterns": [

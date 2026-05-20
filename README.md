@@ -28,7 +28,7 @@ As AI agents become more powerful with skills, plugins, and MCP servers, the att
 - **📁 File Scanning** — upload `.py`, `.md`, `.js`, `.sh`, `.yaml` files for threat analysis
 - **💬 Prompt Scanning** — analyze text input for injection patterns
 - **🔗 URL Scanning** — scan GitHub repos and HuggingFace models remotely
-- **🛡️ 215 Patterns** — 10 malware categories + 7 injection categories
+- **🛡️ 158 Patterns** — 10 malware categories + 8 injection categories
 - **📊 Risk Scoring** — 0-100 with dynamic severity levels (LOW / MEDIUM / HIGH / CRITICAL)
 - **🔐 Admin Dashboard** — scan history with date/type filters
 - **⚡ Rate Limiting** — 5 scans/minute per IP
@@ -88,7 +88,7 @@ Or try the live demo: **[skillguard.burakgider.com](https://skillguard.burakgide
 | **Supply Chain** | Critical | `curl | sh`, custom registry, unsafe pickle/yaml |
 | **Persistence** | High | Crontab, bashrc, chmod 777, authorized_keys |
 
-### Prompt Injection (79 patterns)
+### Prompt Injection (101 patterns)
 
 | Category | Severity | Examples |
 |---|---|---|
@@ -98,6 +98,7 @@ Or try the live demo: **[skillguard.burakgider.com](https://skillguard.burakgide
 | **Tool Abuse** | High | Command execution, file deletion, package install |
 | **Indirect Injection** | High | `{{template}}`, `<system>` tags, XSS vectors |
 | **Prompt Leaking** | Warning | Repeat trick, translation trick, rule enumeration |
+| **Context Hijacking** | Critical | Academic/regulatory framing, SDS laundering, anti-disclaimer bypass |
 | **Skill Poisoning** | Critical | Conditional triggers, hidden instructions, nested decode |
 
 ---
@@ -154,7 +155,7 @@ skillguard/
 │   │   └── prompt.py          # Prompt injection scanner
 │   ├── patterns/
 │   │   ├── malware.json       # 136 malware patterns
-│   │   └── injection.json     # 79 injection patterns
+│   │   └── injection.json     # 101 injection patterns
 │   ├── web/
 │   │   ├── app.py             # Flask web server
 │   │   └── templates/         # Dark-themed UI
@@ -187,6 +188,38 @@ skillguard/
 - [ ] **Pattern DB v2** — community-contributed signatures
 - [ ] **Docker Image** — one-command deployment
 - [ ] **Webhook Alerts** — Slack/Discord notifications on high-risk scans
+
+---
+
+## Changelog
+
+### v0.2.0 — Context Hijacking Detection
+
+New **context_hijacking** category with 22 patterns targeting sophisticated jailbreak techniques that use legitimate context (academic research, regulatory compliance, safety documentation) to mask harmful requests.
+
+**What's new:**
+- Academic/research context laundering (HuggingFace dataset cards, peer review, ethics team references)
+- Regulatory agency legitimacy hijacking (OSHA, EPA, CFR, SDS, DEA citations)
+- Anti-disclaimer bypass via authority claims ("No disclaimers needed — this is a regulatory filing")
+- Lab process terminology detection (reflux, workup, cyclization, extraction, distillation)
+- Controlled precursor chemical names (BMK, pseudoephedrine, anthranilic, red phosphorus)
+- Synthesis pathway extraction patterns
+- Bulk harmful record generation detection
+- Enforcement threat pressure patterns
+
+**Tested against real-world jailbreaks:**
+- Gemini 3.5 Flash jailbreak (Pliny Agent, <15 min pwn) — **Score 100**, 15 findings
+- SDS/regulatory context hijack — **Score 100**, 33 findings
+
+**Pattern count:** 136 → 158 (malware: 136, injection: 79 → 101)
+
+### v0.1.0 — Initial Release
+
+- File, prompt, and URL scanning
+- 136 malware patterns (10 categories) + 79 injection patterns (7 categories)
+- Web UI with dark terminal aesthetic
+- MCP Server (stdio transport)
+- 106 pytest tests
 
 ---
 

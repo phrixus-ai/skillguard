@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 # Load .env if exists (canlı ortam — gerçek değerler)
 load_dotenv()
 
+from skillguard import __version__
 from flask import Flask, render_template, request, jsonify, send_file, session, redirect
 
 from skillguard.scanners.static import StaticScanner, ScanResult, Finding
@@ -126,7 +127,7 @@ def create_app() -> Flask:
             f"Request: {{\"url\": \"<github or huggingface url>\"}}\n"
             f"Response: {{risk_score, risk_level, files_scanned, findings[]}}\n\n"
             f"### GET /health\n"
-            f"Response: {{\"status\": \"ok\", \"version\": \"0.1.0\"}}\n\n"
+            f'Response: {{"status": "ok", "version": "{__version__}"}}\n\n'
             f"> Integration Options\n\n"
             f"SkillGuard provides an MCP Server for AI agent integration via stdio transport.\n"
             f"Tools: scan_file, scan_prompt, scan_directory\n\n"
@@ -256,6 +257,7 @@ def create_app() -> Flask:
             is_production=is_production,
             active_tab=tab,
             seo=seo,
+            version=__version__,
         )
 
     @app.route("/favicon.ico")
@@ -381,7 +383,7 @@ def create_app() -> Flask:
 
     @app.route("/health")
     def health():
-        return jsonify({"status": "ok", "version": "0.1.0"})
+        return jsonify({"status": "ok", "version": __version__})
 
     # ─── Export & Badge ───
 
