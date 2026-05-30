@@ -17,6 +17,9 @@ from mcp.server.fastmcp import FastMCP
 # Import existing scanners
 from skillguard.scanners.static import StaticScanner
 from skillguard.scanners.prompt import PromptScanner
+from skillguard.scanners.ast_scanner import ASTScanner
+from skillguard.scanners.taint_tracker import TaintTracker
+from skillguard.scanners.osv_checker import OSVChecker
 from skillguard.scanners.url import smart_scan_url
 
 # ─── Init ───
@@ -39,6 +42,9 @@ mcp = FastMCP(
 
 _static = StaticScanner()
 _prompt = PromptScanner()
+_ast = ASTScanner()
+_taint = TaintTracker()
+_osv = OSVChecker()
 
 PATTERNS_DIR = Path(__file__).parent / "patterns"
 
@@ -105,6 +111,14 @@ def scan_file(path: str) -> str:
         return json.dumps({"error": f"Not a file: {path}"})
 
     findings = _static.scan_file(file_path)
+
+    # Deep scan: AST + Taint for Python files
+    if file_path.suffix == ".py":
+        try:
+            findings.extend(_ast.scan_file(file_path))
+            findings.extend(_taint.scan_file(file_path))
+        except Exception:
+            pass  # Don't break scan if deep scan fails
 
     weights = {"critical": 25, "high": 15, "warning": 5, "info": 1}
     risk_score = min(sum(weights.get(f.severity, 1) for f in findings), 100)
@@ -177,6 +191,30 @@ def scan_directory(path: str) -> str:
 
     result = _static.scan_directory(dir_path)
 
+    # Deep scan: AST + Taint on Python files
+    skip_dirs = {"node_modules", ".git", "__pycache__", ".venv", "venv", "dist", "build"}
+    py_count = 0
+    for fp in dir_path.rglob("*.py"):
+        if py_count >= 50:
+            break
+        if any(skip in fp.parts for skip in skip_dirs):
+            continue
+        try:
+            result.findings.extend(_ast.scan_file(fp))
+            result.findings.extend(_taint.scan_file(fp))
+            py_count += 1
+        except Exception:
+            pass
+
+    # OSV dependency check
+    for dep_name in {"requirements.txt", "pyproject.toml", "package.json"}:
+        dep_path = dir_path / dep_name
+        if dep_path.exists():
+            try:
+                result.findings.extend(_osv.scan_file(dep_path))
+            except Exception:
+                pass
+
     # Collect per-file breakdown
     file_map = {}
     for f in result.findings:
@@ -223,7 +261,7 @@ def scan_url(url: str) -> str:
         return json.dumps({"error": "Only github.com and huggingface.co URLs are supported"})
 
     try:
-        result = smart_scan_url(url, _static)
+        result = smart_scan_url(url, _static, _ast)
     except Exception as e:
         return json.dumps({"error": f"Failed to scan URL: {str(e)}"})
 

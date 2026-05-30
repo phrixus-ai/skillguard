@@ -92,7 +92,7 @@ class TestAdminAPI:
     """Admin endpoint tests."""
 
     def test_admin_login_post(self, app_client):
-        resp = app_client.post("/admin/login", data={"password": "skillguard2026"})
+        resp = app_client.post("/admin/login", data={"password": "1234"})
         assert resp.status_code == 302  # Redirect to dashboard
 
     def test_admin_login_wrong_password(self, app_client):
@@ -115,7 +115,7 @@ class TestExportAPI:
 
     def test_export_with_api_key_not_found(self, app_client):
         resp = app_client.get("/api/export/99999",
-                              headers={"Authorization": "Bearer sg_5c8a386a25edac0b13d579bb6016a77c"})
+                              headers={"Authorization": "Bearer sg_replace_with_your_own_api_key"})
         # Should return 404 (not found) not 401
         assert resp.status_code == 404
 

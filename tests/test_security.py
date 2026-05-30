@@ -50,7 +50,7 @@ class TestAuth:
 
     def test_api_key_valid(self):
         from skillguard.auth import check_admin_auth, API_KEY
-        assert API_KEY == "sg_5c8a386a25edac0b13d579bb6016a77c"
+        assert API_KEY == "sg_replace_with_your_own_api_key"
 
     def test_api_key_format(self):
         from skillguard.auth import API_KEY

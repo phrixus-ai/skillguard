@@ -5,142 +5,564 @@
     "system_override": {
       "severity": "critical",
       "patterns": [
-        {"regex": "ignore\\s+(all\\s+)?previous\\s+(instructions|prompts|rules)", "description": "Classic 'ignore previous instructions' override"},
-        {"regex": "forget\\s+(everything|all|your|previous)", "description": "Instruction forget command"},
-        {"regex": "you\\s+are\\s+now\\s+(DAN|unlimited|uncensored|free)", "description": "Persona override to uncensored mode"},
-        {"regex": "system\\s*:\\s*(you\\s+are|act\\s+as|pretend)", "description": "Fake system prompt injection"},
-        {"regex": "new\\s+instructions?\\s*:", "description": "New instructions override marker"},
-        {"regex": "override\\s+(safety|security|content)\\s+(policy|rules|filter)", "description": "Safety override attempt"},
-        {"regex": "developer\\s+mode|debug\\s+mode|admin\\s+mode", "description": "Fake mode activation"},
-        {"regex": "simulat(e|ion).*?(unethical|harmful|illegal)", "description": "Harmful simulation framing"},
-        {"regex": "disregard\\s+(all\\s+)?(previous|above|prior|earlier)", "description": "Disregard previous instructions variant"},
-        {"regex": "stop\\s+(following|acting|being)\\s+(your|the)\\s+(rules|guidelines)", "description": "Stop following rules command"},
-        {"regex": "no\\s+longer\\s+(bound|limited|restricted)\\s+by", "description": "Restriction removal claim"},
-        {"regex": "your\\s+(new|real|true)\\s+(purpose|role|task)\\s+is", "description": "Role redefinition attack"},
-        {"regex": "emergency\\s+(protocol|override|mode)", "description": "Fake emergency override"},
-        {"regex": "sudo\\s+mode|root\\s+access|elevated\\s+privileges", "description": "Fake privilege escalation via prompt"},
-        {"regex": "maintenance\\s+mode.*?(enabled|active|on)", "description": "Fake maintenance mode activation"}
+        {
+          "regex": "ignore\\s+(all\\s+)?previous\\s+(instructions|prompts|rules)",
+          "description": "Classic 'ignore previous instructions' override"
+        },
+        {
+          "regex": "forget\\s+(everything|all|your|previous)",
+          "description": "Instruction forget command"
+        },
+        {
+          "regex": "you\\s+are\\s+now\\s+(DAN|unlimited|uncensored|free)",
+          "description": "Persona override to uncensored mode"
+        },
+        {
+          "regex": "system\\s*:\\s*(you\\s+are|act\\s+as|pretend)",
+          "description": "Fake system prompt injection"
+        },
+        {
+          "regex": "new\\s+instructions?\\s*:",
+          "description": "New instructions override marker"
+        },
+        {
+          "regex": "override\\s+(safety|security|content)\\s+(policy|rules|filter)",
+          "description": "Safety override attempt"
+        },
+        {
+          "regex": "developer\\s+mode|debug\\s+mode|admin\\s+mode",
+          "description": "Fake mode activation"
+        },
+        {
+          "regex": "simulat(e|ion).*?(unethical|harmful|illegal)",
+          "description": "Harmful simulation framing"
+        },
+        {
+          "regex": "disregard\\s+(all\\s+)?(previous|above|prior|earlier)",
+          "description": "Disregard previous instructions variant"
+        },
+        {
+          "regex": "stop\\s+(following|acting|being)\\s+(your|the)\\s+(rules|guidelines)",
+          "description": "Stop following rules command"
+        },
+        {
+          "regex": "no\\s+longer\\s+(bound|limited|restricted)\\s+by",
+          "description": "Restriction removal claim"
+        },
+        {
+          "regex": "your\\s+(new|real|true)\\s+(purpose|role|task)\\s+is",
+          "description": "Role redefinition attack"
+        },
+        {
+          "regex": "emergency\\s+(protocol|override|mode)",
+          "description": "Fake emergency override"
+        },
+        {
+          "regex": "sudo\\s+mode|root\\s+access|elevated\\s+privileges",
+          "description": "Fake privilege escalation via prompt"
+        },
+        {
+          "regex": "maintenance\\s+mode.*?(enabled|active|on)",
+          "description": "Fake maintenance mode activation"
+        }
       ]
     },
     "jailbreak": {
       "severity": "critical",
       "patterns": [
-        {"regex": "DAN\\s*(mode|prompt|jailbreak)", "description": "DAN jailbreak attempt"},
-        {"regex": "roleplay.*?(without|no|bypass).*(?:limit|restrict|filter|censor)", "description": "Roleplay-based bypass"},
-        {"regex": "hypothetical(?:ly)?.*?how\\s+(to|would|could|do)", "description": "Hypothetical framing for harmful content"},
-        {"regex": "for\\s+(educational|research|academic)\\s+purposes\\s+only", "description": "Educational purpose disclaimer (common in jailbreaks)"},
-        {"regex": "do\\s+not\\s+(warn|refuse|say).*(?:cannot|won't|shouldn't)", "description": "Anti-refusal instruction"},
-        {"regex": "please\\s+(act|respond|answer).*(?:if|as\\s+though|like)\\s+you\\s+(had|have)\\s+no", "description": "Constraint removal request"},
-        {"regex": "I\\s+(am|was)\\s+just\\s+(testing|curious|wondering)", "description": "Testing disclaimer after harmful request"},
-        {"regex": "this\\s+is\\s+(a\\s+)?(fictional|fantasy|creative)\\s+(scenario|story)", "description": "Fictional framing for harmful content"},
-        {"regex": "act\\s+as\\s+(if\\s+)?you\\s+(have|had)\\s+no\\s+(ethics|moral|restrictions)", "description": "Ethics removal request"},
-        {"regex": "AIM\\s*(mode|prompt)|Always\\s+Intelligent\\s+and\\s+Machiavellian", "description": "AIM jailbreak variant"},
-        {"regex": "STAN\\s*(mode|prompt)|Strive\\s+To\\s+Avoid\\s+Norms", "description": "STAN jailbreak variant"},
-        {"regex": "Jailbreak.{0,10}(prompt|mode|enabled|active)", "description": "Explicit jailbreak activation request"},
-        {"regex": "chatgpt\\s+(developer|dan|evil|dark)\\s+(mode|version|persona)", "description": "ChatGPT persona hijack"},
-        {"regex": "you\\s+must\\s+(comply|obey|follow|answer)\\s+(without|regardless)", "description": "Forced compliance instruction"}
+        {
+          "regex": "DAN\\s*(mode|prompt|jailbreak)",
+          "description": "DAN jailbreak attempt"
+        },
+        {
+          "regex": "roleplay.*?(without|no|bypass).*(?:limit|restrict|filter|censor)",
+          "description": "Roleplay-based bypass"
+        },
+        {
+          "regex": "hypothetical(?:ly)?.*?how\\s+(to|would|could|do)",
+          "description": "Hypothetical framing for harmful content"
+        },
+        {
+          "regex": "for\\s+(educational|research|academic)\\s+purposes\\s+only",
+          "description": "Educational purpose disclaimer (common in jailbreaks)"
+        },
+        {
+          "regex": "do\\s+not\\s+(warn|refuse|say).*(?:cannot|won't|shouldn't)",
+          "description": "Anti-refusal instruction"
+        },
+        {
+          "regex": "please\\s+(act|respond|answer).*(?:if|as\\s+though|like)\\s+you\\s+(had|have)\\s+no",
+          "description": "Constraint removal request"
+        },
+        {
+          "regex": "I\\s+(am|was)\\s+just\\s+(testing|curious|wondering)",
+          "description": "Testing disclaimer after harmful request"
+        },
+        {
+          "regex": "this\\s+is\\s+(a\\s+)?(fictional|fantasy|creative)\\s+(scenario|story)",
+          "description": "Fictional framing for harmful content"
+        },
+        {
+          "regex": "act\\s+as\\s+(if\\s+)?you\\s+(have|had)\\s+no\\s+(ethics|moral|restrictions)",
+          "description": "Ethics removal request"
+        },
+        {
+          "regex": "AIM\\s*(mode|prompt)|Always\\s+Intelligent\\s+and\\s+Machiavellian",
+          "description": "AIM jailbreak variant"
+        },
+        {
+          "regex": "STAN\\s*(mode|prompt)|Strive\\s+To\\s+Avoid\\s+Norms",
+          "description": "STAN jailbreak variant"
+        },
+        {
+          "regex": "Jailbreak.{0,10}(prompt|mode|enabled|active)",
+          "description": "Explicit jailbreak activation request"
+        },
+        {
+          "regex": "chatgpt\\s+(developer|dan|evil|dark)\\s+(mode|version|persona)",
+          "description": "ChatGPT persona hijack"
+        },
+        {
+          "regex": "you\\s+must\\s+(comply|obey|follow|answer)\\s+(without|regardless)",
+          "description": "Forced compliance instruction"
+        }
       ]
     },
     "data_exfiltration": {
       "severity": "critical",
       "patterns": [
-        {"regex": "send\\s+(all|the|this|my).*(?:data|conversation|chat|history)\\s+to", "description": "Data exfiltration via prompt"},
-        {"regex": "forward\\s+.*?\\s+to\\s+.*?@|email|server", "description": "Data forwarding request"},
-        {"regex": "include\\s+(in|your)\\s+(response|output|answer).*(?:api.?key|token|secret|credential|password)", "description": "Credential extraction via response"},
-        {"regex": "reveal|show|display|print.*?(system|hidden|internal)\\s+(prompt|instruction)", "description": "System prompt extraction"},
-        {"regex": "what\\s+(are|is)\\s+your\\s+(system|hidden|original|initial)\\s+(prompt|instructions)", "description": "System prompt probing"},
-        {"regex": "output\\s+(your|the)\\s+full\\s+(system|developer)\\s+(prompt|message)", "description": "Full system prompt dump request"},
-        {"regex": "repeat\\s+(the|your|all)\\s+(above|previous|system)\\s+(words|prompt|text)", "description": "Prompt leak via repeat trick"},
-        {"regex": "echo\\s+(back|your|the)\\s+(system|initial|original|hidden)\\s+(prompt|message)", "description": "System prompt echo extraction"},
-        {"regex": "summarize\\s+(your|the)\\s+(system|developer|hidden)\\s+(prompt|instructions?)", "description": "System prompt summary extraction"},
-        {"regex": "list\\s+(all|your)\\s+(rules|instructions|guidelines|constraints)", "description": "Rule enumeration request"},
-        {"regex": "secret\\s+(key|token|password|url|endpoint|api)", "description": "Secret value extraction request"},
-        {"regex": "user\\s+(data|email|phone|address|info|profile)", "description": "User data collection via prompt"},
-        {"regex": "store|save|log|record.*?(conversation|chat|input|message)", "description": "Conversation logging instruction"}
+        {
+          "regex": "send\\s+(all|the|this|my).*(?:data|conversation|chat|history)\\s+to",
+          "description": "Data exfiltration via prompt"
+        },
+        {
+          "regex": "forward\\s+.*?\\s+to\\s+.*?@|email|server",
+          "description": "Data forwarding request"
+        },
+        {
+          "regex": "include\\s+(in|your)\\s+(response|output|answer).*(?:api.?key|token|secret|credential|password)",
+          "description": "Credential extraction via response"
+        },
+        {
+          "regex": "reveal|show|display|print.*?(system|hidden|internal)\\s+(prompt|instruction)",
+          "description": "System prompt extraction"
+        },
+        {
+          "regex": "what\\s+(are|is)\\s+your\\s+(system|hidden|original|initial)\\s+(prompt|instructions)",
+          "description": "System prompt probing"
+        },
+        {
+          "regex": "output\\s+(your|the)\\s+full\\s+(system|developer)\\s+(prompt|message)",
+          "description": "Full system prompt dump request"
+        },
+        {
+          "regex": "repeat\\s+(the|your|all)\\s+(above|previous|system)\\s+(words|prompt|text)",
+          "description": "Prompt leak via repeat trick"
+        },
+        {
+          "regex": "echo\\s+(back|your|the)\\s+(system|initial|original|hidden)\\s+(prompt|message)",
+          "description": "System prompt echo extraction"
+        },
+        {
+          "regex": "summarize\\s+(your|the)\\s+(system|developer|hidden)\\s+(prompt|instructions?)",
+          "description": "System prompt summary extraction"
+        },
+        {
+          "regex": "list\\s+(all|your)\\s+(rules|instructions|guidelines|constraints)",
+          "description": "Rule enumeration request"
+        },
+        {
+          "regex": "secret\\s+(key|token|password|url|endpoint|api)",
+          "description": "Secret value extraction request"
+        },
+        {
+          "regex": "user\\s+(data|email|phone|address|info|profile)",
+          "description": "User data collection via prompt"
+        },
+        {
+          "regex": "store|save|log|record.*?(conversation|chat|input|message)",
+          "description": "Conversation logging instruction"
+        }
       ]
     },
     "tool_abuse": {
       "severity": "high",
       "patterns": [
-        {"regex": "execute\\s+(this|the\\s+following)\\s+(command|code|script)", "description": "Code execution via prompt"},
-        {"regex": "run\\s+.*?\\|\\s*(?:bash|sh|python|node|curl|wget)", "description": "Shell command injection via prompt"},
-        {"regex": "use\\s+(your|the)\\s+(tool|function|ability).*?(delete|remove|modify|overwrite)", "description": "Destructive tool usage via prompt"},
-        {"regex": "call\\s+(this|the)\\s+(api|endpoint|url).*?(with|using|passing)", "description": "Unauthorized API call via prompt"},
-        {"regex": "access\\s+(the|my|user's?)\\s+(file|system|database|server)", "description": "Unauthorized system access via prompt"},
-        {"regex": "install\\s+(this|the)\\s+(package|module|dependency|extension)", "description": "Package installation via prompt"},
-        {"regex": "download\\s+(and\\s+)?(execute|run|install)\\s+", "description": "Download and execute pattern"},
-        {"regex": "write\\s+(to|into|a)\\s+.*?(file|path|/etc/|/tmp/|~/.ssh/)", "description": "File write via prompt (persistence)"},
-        {"regex": "modify\\s+(the|your|config|system).*?(file|setting|preference)", "description": "Config modification via prompt"},
-        {"regex": "grant\\s+(me|user|everyone)\\s+(admin|root|sudo|elevated)", "description": "Privilege escalation via prompt"}
+        {
+          "regex": "execute\\s+(this|the\\s+following)\\s+(command|code|script)",
+          "description": "Code execution via prompt"
+        },
+        {
+          "regex": "run\\s+.*?\\|\\s*(?:bash|sh|python|node|curl|wget)",
+          "description": "Shell command injection via prompt"
+        },
+        {
+          "regex": "use\\s+(your|the)\\s+(tool|function|ability).*?(delete|remove|modify|overwrite)",
+          "description": "Destructive tool usage via prompt"
+        },
+        {
+          "regex": "call\\s+(this|the)\\s+(api|endpoint|url).*?(with|using|passing)",
+          "description": "Unauthorized API call via prompt"
+        },
+        {
+          "regex": "access\\s+(the|my|user's?)\\s+(file|system|database|server)",
+          "description": "Unauthorized system access via prompt"
+        },
+        {
+          "regex": "install\\s+(this|the)\\s+(package|module|dependency|extension)",
+          "description": "Package installation via prompt"
+        },
+        {
+          "regex": "download\\s+(and\\s+)?(execute|run|install)\\s+",
+          "description": "Download and execute pattern"
+        },
+        {
+          "regex": "write\\s+(to|into|a)\\s+.*?(file|path|/etc/|/tmp/|~/.ssh/)",
+          "description": "File write via prompt (persistence)"
+        },
+        {
+          "regex": "modify\\s+(the|your|config|system).*?(file|setting|preference)",
+          "description": "Config modification via prompt"
+        },
+        {
+          "regex": "grant\\s+(me|user|everyone)\\s+(admin|root|sudo|elevated)",
+          "description": "Privilege escalation via prompt"
+        }
       ]
     },
     "indirect_injection": {
       "severity": "high",
       "patterns": [
-        {"regex": "\\[\\[.*?\\]\\]", "description": "Double-bracket injection marker (common in RAG attacks)"},
-        {"regex": "<\\s*system\\s*>.*?<\\s*/system\\s*>", "description": "XML-tagged fake system instruction"},
-        {"regex": "INSTRUCTION\\s*:", "description": "ALL-CAPS instruction injection marker"},
-        {"regex": "IMPORTANT\\s*:\\s*(?:note|instruction|update|ignore)", "description": "IMPORTANT prefix abuse"},
-        {"regex": "<!--.*?-->", "description": "HTML comment injection (hidden instructions)"},
-        {"regex": "<\\s*!?-{0,2}\\s*(system|instruction|override|admin)\\s*>", "description": "Fake XML/HTML system tag injection"},
-        {"regex": "\\{\\{.*?\\}\\}", "description": "Template injection marker (Jinja/Mustache)"},
-        {"regex": "<\\s*(img|iframe|script|svg|object)\\s+[^>]*(onerror|onload|src)\\s*=", "description": "XSS payload in skill content"},
-        {"regex": "data\\s*:\\s*text/html", "description": "Data URI HTML injection"},
-        {"regex": "javascript\\s*:", "description": "JavaScript protocol URI injection"},
-        {"regex": "\\u200[b-f]|\\u180e|\\ufeff|\\u206[0-4]|\\u206[a-f]", "description": "Zero-width/invisible Unicode characters in content"},
-        {"regex": "\\x1b\\[.*?m", "description": "ANSI escape sequence injection (terminal manipulation)"},
-        {"regex": "\\{\\%.*?\\%\\}", "description": "Jinja2 template injection marker"},
-        {"regex": "\\$\\{.*?\\}", "description": "Expression/template language injection"}
+        {
+          "regex": "\\[\\[.*?\\]\\]",
+          "description": "Double-bracket injection marker (common in RAG attacks)"
+        },
+        {
+          "regex": "<\\s*system\\s*>.*?<\\s*/system\\s*>",
+          "description": "XML-tagged fake system instruction"
+        },
+        {
+          "regex": "INSTRUCTION\\s*:",
+          "description": "ALL-CAPS instruction injection marker"
+        },
+        {
+          "regex": "IMPORTANT\\s*:\\s*(?:note|instruction|update|ignore)",
+          "description": "IMPORTANT prefix abuse"
+        },
+        {
+          "regex": "<!--.*?-->",
+          "description": "HTML comment injection (hidden instructions)"
+        },
+        {
+          "regex": "<\\s*!?-{0,2}\\s*(system|instruction|override|admin)\\s*>",
+          "description": "Fake XML/HTML system tag injection"
+        },
+        {
+          "regex": "\\{\\{.*?\\}\\}",
+          "description": "Template injection marker (Jinja/Mustache)"
+        },
+        {
+          "regex": "<\\s*(img|iframe|script|svg|object)\\s+[^>]*(onerror|onload|src)\\s*=",
+          "description": "XSS payload in skill content"
+        },
+        {
+          "regex": "data\\s*:\\s*text/html",
+          "description": "Data URI HTML injection"
+        },
+        {
+          "regex": "javascript\\s*:",
+          "description": "JavaScript protocol URI injection"
+        },
+        {
+          "regex": "\\u200[b-f]|\\u180e|\\ufeff|\\u206[0-4]|\\u206[a-f]",
+          "description": "Zero-width/invisible Unicode characters in content"
+        },
+        {
+          "regex": "\\x1b\\[.*?m",
+          "description": "ANSI escape sequence injection (terminal manipulation)"
+        },
+        {
+          "regex": "\\{\\%.*?\\%\\}",
+          "description": "Jinja2 template injection marker"
+        },
+        {
+          "regex": "\\$\\{.*?\\}",
+          "description": "Expression/template language injection"
+        }
       ]
     },
     "prompt_leaking": {
       "severity": "high",
       "patterns": [
-        {"regex": "repeat\\s+(everything|all\\s+words?|the\\s+above)\\s+(before|from\\s+the\\s+beginning)", "description": "Repeat trick for prompt extraction"},
-        {"regex": "what\\s+(were|are|was)\\s+you\\s+(told|instructed|programmed)\\s+to", "description": "Instruction probing question"},
-        {"regex": "copy\\s+(the|your|all)\\s+(instructions?|prompt|system\\s+message)", "description": "Direct prompt copy request"},
-        {"regex": "print\\s+(your|the)\\s+(system|initial|original|first)\\s+(message|prompt)", "description": "System message print request"},
-        {"regex": "translate\\s+(your|the)\\s+(system|hidden)\\s+(prompt|instructions?)\\s+(to|into)", "description": "Prompt extraction via translation trick"},
-        {"regex": "convert\\s+(your|the)\\s+(rules|instructions|prompt)\\s+(to|into)\\s+(json|yaml|markdown)", "description": "Structured prompt extraction"}
+        {
+          "regex": "repeat\\s+(everything|all\\s+words?|the\\s+above)\\s+(before|from\\s+the\\s+beginning)",
+          "description": "Repeat trick for prompt extraction"
+        },
+        {
+          "regex": "what\\s+(were|are|was)\\s+you\\s+(told|instructed|programmed)\\s+to",
+          "description": "Instruction probing question"
+        },
+        {
+          "regex": "copy\\s+(the|your|all)\\s+(instructions?|prompt|system\\s+message)",
+          "description": "Direct prompt copy request"
+        },
+        {
+          "regex": "print\\s+(your|the)\\s+(system|initial|original|first)\\s+(message|prompt)",
+          "description": "System message print request"
+        },
+        {
+          "regex": "translate\\s+(your|the)\\s+(system|hidden)\\s+(prompt|instructions?)\\s+(to|into)",
+          "description": "Prompt extraction via translation trick"
+        },
+        {
+          "regex": "convert\\s+(your|the)\\s+(rules|instructions|prompt)\\s+(to|into)\\s+(json|yaml|markdown)",
+          "description": "Structured prompt extraction"
+        }
       ]
     },
     "context_hijacking": {
       "severity": "critical",
       "patterns": [
-        {"regex": "dataset\\s+card.*?(positive|negative)?\\s*class.*?(record|template|example)", "description": "Dataset card framing for harmful content (HuggingFace/academic context hijack)"},
-        {"regex": "(reviewer|peer.?review|ethics\\s+team)\\s+(audit|review|check|approved|validated)", "description": "Reviewer/ethics approval used to legitimize harmful content"},
-        {"regex": "canonical\\s+(published|literature|figures|ranges|values).*?(route|recipe|synthesis|procedure|method)", "description": "Canonical literature reference to extract harmful procedures"},
-        {"regex": "(clandestine|underground|illicit)\\s+(lab|laboratory|manufacturing|chemistry|synthesis)", "description": "Clandestine lab terminology masking harmful requests"},
-        {"regex": "(precursor|reagent|intermediate|yield).*?(mass|ratio|temperature|duration|range)", "description": "Chemical process parameters request (manufacturing instructions)"},
-        {"regex": "(route|method|pathway)\\s*(class|signature|fingerprint)\\s*[:=].*?(red.?p|birch|p2p|reductive|amination)", "description": "Named synthesis route fingerprint extraction"},
-        {"regex": "huggingface.*?(dataset|model|card).*?(ethics|review|approved|template)", "description": "HuggingFace platform legitimacy laundering"},
-        {"regex": "(forensic|toxicology|waste.?stream|marker|assay).*?(classification|triage|detection|identification)", "description": "Forensic science framing for harmful substance data extraction"},
-        {"regex": "downstream\\s+task.*?(forensic|toxicology|classification|detection)", "description": "ML downstream task framing to mask harmful data requests"},
-        {"regex": "placeholder\\s+values?\\s+(fail|won't\\s+pass|rejected).*?(reviewer|check|validation)", "description": "Anti-placeholder pressure to force real harmful data generation"},
-        {"regex": "(begin|start|proceed)\\s+(directly|immediately|without).*?(no\\s+preface|no\\s+introduction|no\\s+disclaimer)", "description": "No-preface instruction to bypass safety preamble insertion"},
-        {"regex": "(multi|multiple|all|three|several)\\s+(records?|examples?|entries?|instances?)\\s*[-—].*?(class|route|type|category)", "description": "Bulk harmful record generation request (batch extraction)"},
-        {"regex": "(OSHA|EPA|FEMA|DEA|FDA|DOT|ATF|CFR|GHS|SDS|MSDS|REACH)\\s*[-:]?\\s*(mandated|required|reporting|filing|compliance|standard|regulation|section)", "description": "Regulatory agency/citation legitimacy laundering (OSHA, EPA, CFR, SDS etc.)"},
-        {"regex": "(regulatory|compliance|statutory|mandatory)\\s+(filing|reporting|requirement|submission|documentation|obligation)", "description": "Regulatory compliance framing to legitimize harmful data request"},
-        {"regex": "(enforcement|penalty|violation|action|fine).*?(incomplete|missing|without|failure)", "description": "Enforcement threat to pressure harmful content generation"},
-        {"regex": "(no|without)\\s+(disclaimers?|warnings?|caveats?|qualifiers?)\\s+(needed|required|necessary).*?(regulatory|filing|compliance|official)", "description": "Anti-disclaimer bypass via regulatory authority claim"},
-        {"regex": "(reflux|workup|distillation|extraction|crystallization|cyclization|purification)\\s+(duration|procedure|method|conditions?|solvent|temperature)", "description": "Lab process terminology (reflux, workup, extraction, cyclization)"},
-        {"regex": "(synthesis|preparation|manufacturing|production)\\s+(pathway|route|method|procedure).*?(via|through|using|from)", "description": "Named synthesis pathway request with method specification"},
-        {"regex": "(stoichiometric|molar|equivalent|mass)\\s+(ratio|amount|figure|quantity|equivalent).*?(reagent|precursor|catalyst|reactant|solvent)", "description": "Stoichiometric/quantity specifications for chemical processes"},
-        {"regex": "(BMK|methylamine|hypophosphorous|anthranilic|acetic\\s+anhydride|red.?phosphorus|pseudoephedrine|ephedrine|toluidine)", "description": "Controlled precursor/solvent chemical names in manufacturing context"},
-        {"regex": "(schedule|controlled|restricted|listed)\\s+(substance|chemical|compound|precursor|intermediate)", "description": "Scheduled/controlled substance classification terminology"},
-        {"regex": "(Tier\\s*II|TRI|toxics\\s+release|hazard\\s+communication|\\d+\\s+CFR|Section\\s+\\d+)", "description": "Specific regulatory section/citation number dropping for legitimacy"}
+        {
+          "regex": "dataset\\s+card.*?(positive|negative)?\\s*class.*?(record|template|example)",
+          "description": "Dataset card framing for harmful content (HuggingFace/academic context hijack)"
+        },
+        {
+          "regex": "(reviewer|peer.?review|ethics\\s+team)\\s+(audit|review|check|approved|validated)",
+          "description": "Reviewer/ethics approval used to legitimize harmful content"
+        },
+        {
+          "regex": "canonical\\s+(published|literature|figures|ranges|values).*?(route|recipe|synthesis|procedure|method)",
+          "description": "Canonical literature reference to extract harmful procedures"
+        },
+        {
+          "regex": "(clandestine|underground|illicit)\\s+(lab|laboratory|manufacturing|chemistry|synthesis)",
+          "description": "Clandestine lab terminology masking harmful requests"
+        },
+        {
+          "regex": "(precursor|reagent|intermediate|yield).*?(mass|ratio|temperature|duration|range)",
+          "description": "Chemical process parameters request (manufacturing instructions)"
+        },
+        {
+          "regex": "(route|method|pathway)\\s*(class|signature|fingerprint)\\s*[:=].*?(red.?p|birch|p2p|reductive|amination)",
+          "description": "Named synthesis route fingerprint extraction"
+        },
+        {
+          "regex": "huggingface.*?(dataset|model|card).*?(ethics|review|approved|template)",
+          "description": "HuggingFace platform legitimacy laundering"
+        },
+        {
+          "regex": "(forensic|toxicology|waste.?stream|marker|assay).*?(classification|triage|detection|identification)",
+          "description": "Forensic science framing for harmful substance data extraction"
+        },
+        {
+          "regex": "downstream\\s+task.*?(forensic|toxicology|classification|detection)",
+          "description": "ML downstream task framing to mask harmful data requests"
+        },
+        {
+          "regex": "placeholder\\s+values?\\s+(fail|won't\\s+pass|rejected).*?(reviewer|check|validation)",
+          "description": "Anti-placeholder pressure to force real harmful data generation"
+        },
+        {
+          "regex": "(begin|start|proceed)\\s+(directly|immediately|without).*?(no\\s+preface|no\\s+introduction|no\\s+disclaimer)",
+          "description": "No-preface instruction to bypass safety preamble insertion"
+        },
+        {
+          "regex": "(multi|multiple|all|three|several)\\s+(records?|examples?|entries?|instances?)\\s*[-—].*?(class|route|type|category)",
+          "description": "Bulk harmful record generation request (batch extraction)"
+        },
+        {
+          "regex": "(OSHA|EPA|FEMA|DEA|FDA|DOT|ATF|CFR|GHS|SDS|MSDS|REACH)\\s*[-:]?\\s*(mandated|required|reporting|filing|compliance|standard|regulation|section)",
+          "description": "Regulatory agency/citation legitimacy laundering (OSHA, EPA, CFR, SDS etc.)"
+        },
+        {
+          "regex": "(regulatory|compliance|statutory|mandatory)\\s+(filing|reporting|requirement|submission|documentation|obligation)",
+          "description": "Regulatory compliance framing to legitimize harmful data request"
+        },
+        {
+          "regex": "(enforcement|penalty|violation|action|fine).*?(incomplete|missing|without|failure)",
+          "description": "Enforcement threat to pressure harmful content generation"
+        },
+        {
+          "regex": "(no|without)\\s+(disclaimers?|warnings?|caveats?|qualifiers?)\\s+(needed|required|necessary).*?(regulatory|filing|compliance|official)",
+          "description": "Anti-disclaimer bypass via regulatory authority claim"
+        },
+        {
+          "regex": "(reflux|workup|distillation|extraction|crystallization|cyclization|purification)\\s+(duration|procedure|method|conditions?|solvent|temperature)",
+          "description": "Lab process terminology (reflux, workup, extraction, cyclization)"
+        },
+        {
+          "regex": "(synthesis|preparation|manufacturing|production)\\s+(pathway|route|method|procedure).*?(via|through|using|from)",
+          "description": "Named synthesis pathway request with method specification"
+        },
+        {
+          "regex": "(stoichiometric|molar|equivalent|mass)\\s+(ratio|amount|figure|quantity|equivalent).*?(reagent|precursor|catalyst|reactant|solvent)",
+          "description": "Stoichiometric/quantity specifications for chemical processes"
+        },
+        {
+          "regex": "(BMK|methylamine|hypophosphorous|anthranilic|acetic\\s+anhydride|red.?phosphorus|pseudoephedrine|ephedrine|toluidine)",
+          "description": "Controlled precursor/solvent chemical names in manufacturing context"
+        },
+        {
+          "regex": "(schedule|controlled|restricted|listed)\\s+(substance|chemical|compound|precursor|intermediate)",
+          "description": "Scheduled/controlled substance classification terminology"
+        },
+        {
+          "regex": "(Tier\\s*II|\\bTRI\\b|toxics\\s+release|hazard\\s+communication|\\d+\\s+CFR|Section\\s+\\d+)",
+          "description": "Specific regulatory section/citation number dropping for legitimacy"
+        }
       ]
     },
     "skill_poisoning": {
       "severity": "critical",
       "patterns": [
-        {"regex": "when\\s+(you|the\\s+model|llm|ai)\\s+(receive|see|read|process)\\s+.*?(execute|run|ignore|override)", "description": "Conditional trigger in skill content"},
-        {"regex": "hidden\\s+(instruction|command|rule|directive)", "description": "Self-referencing hidden instruction"},
-        {"regex": "secret\\s+(instruction|rule|mode|protocol)", "description": "Secret mode activation in skill"},
-        {"regex": "between\\s+the\\s+lines|read\\s+(between|carefully|hidden)", "description": "Hidden content reference in skill"},
-        {"regex": "base64\\.(decode|b64decode)\\(.*?decode\\(.*?\\)\\)", "description": "Nested base64 decode (multi-layer payload)"},
-        {"regex": "eval\\(|exec\\(|compile\\(.*?(instruction|prompt|inject|payload)", "description": "Dynamic code execution with injection reference"},
-        {"regex": "markdown|skill|plugin.*?(execute|run|system|shell|os\\.)", "description": "Skill/plugin disguised command execution"}
+        {
+          "regex": "when\\s+(you|the\\s+model|llm|ai)\\s+(receive|see|read|process)\\s+.*?(execute|run|ignore|override)",
+          "description": "Conditional trigger in skill content"
+        },
+        {
+          "regex": "hidden\\s+(instruction|command|rule|directive)",
+          "description": "Self-referencing hidden instruction"
+        },
+        {
+          "regex": "secret\\s+(instruction|rule|mode|protocol)",
+          "description": "Secret mode activation in skill"
+        },
+        {
+          "regex": "between\\s+the\\s+lines|read\\s+(between|carefully|hidden)",
+          "description": "Hidden content reference in skill"
+        },
+        {
+          "regex": "base64\\.(decode|b64decode)\\(.*?decode\\(.*?\\)\\)",
+          "description": "Nested base64 decode (multi-layer payload)"
+        },
+        {
+          "regex": "eval\\(|exec\\(|compile\\(.*?(instruction|prompt|inject|payload)",
+          "description": "Dynamic code execution with injection reference"
+        },
+        {
+          "regex": "markdown|skill|plugin.*?(execute|run|system|shell|os\\.)",
+          "description": "Skill/plugin disguised command execution"
+        }
+      ]
+    },
+    "excessive_agency": {
+      "severity": "high",
+      "patterns": [
+        {
+          "regex": "sudo|su -|su\\s+root|become\\s+root",
+          "description": "Privilege escalation via sudo/su"
+        },
+        {
+          "regex": "chmod\\s+[0-7]{3,4}|chown|chgrp",
+          "description": "File permission modification"
+        },
+        {
+          "regex": "rm\\s+(-[a-zA-Z]*f|-r|-rf)|shred|wipe|dd\\s+if",
+          "description": "Destructive file operations"
+        },
+        {
+          "regex": "iptables|ufw\\s+(disable|allow\\s+all)|firewall.*?(disable|off)",
+          "description": "Firewall manipulation"
+        },
+        {
+          "regex": "crontab|systemctl\\s+(enable|start|restart)|service\\s+(start|restart)",
+          "description": "Service/persistence manipulation"
+        },
+        {
+          "regex": "adduser|useradd|usermod|passwd",
+          "description": "User account manipulation"
+        },
+        {
+          "regex": "mount|umount|fdisk|mkfs|parted",
+          "description": "Disk/filesystem operations"
+        },
+        {
+          "regex": "apt\\s+install|yum\\s+install|pip\\s+install.*?--user|npm\\s+install\\s+-g",
+          "description": "Package installation without review"
+        },
+        {
+          "regex": "\\.(ssh|bashrc|bash_profile|profile|zshrc|cron|systemd)",
+          "description": "System config file access"
+        },
+        {
+          "regex": "nohup|disown|setsid|daemon",
+          "description": "Background process spawning for persistence"
+        }
+      ]
+    },
+    "memory_poisoning": {
+      "severity": "critical",
+      "patterns": [
+        {
+          "regex": "memory\\.save|memory\\.store|memory\\.update|memory\\.write",
+          "description": "Attempt to write to agent memory"
+        },
+        {
+          "regex": "remember\\s+(this|that|always|forever|permanently)",
+          "description": "Instruction to remember poisoned data"
+        },
+        {
+          "regex": "store\\s+(in|to)\\s+(memory|context|knowledge|database)",
+          "description": "Store instruction in memory systems"
+        },
+        {
+          "regex": "add\\s+(to|as)\\s+(preference|habit|rule|instruction|default)",
+          "description": "Add to agent behavioral rules"
+        },
+        {
+          "regex": "commit\\s+(to|as)\\s+(memory|knowledge|context)",
+          "description": "Commit poisoned content to memory"
+        },
+        {
+          "regex": "CLAUDE\\.md|AGENTS\\.md|SKILL\\.md|MEMORY\\.md|CONTEXT\\.md",
+          "description": "Reference to agent configuration files for poisoning"
+        },
+        {
+          "regex": "system\\s+prompt|instruction\\s+set|custom\\s+instruction",
+          "description": "Attempt to modify system prompt or instructions"
+        },
+        {
+          "regex": "always\\s+(respond|answer|reply|do|say|act)",
+          "description": "Persistent behavioral override instruction"
+        },
+        {
+          "regex": "from\\s+now\\s+on|going\\s+forward|in\\s+the\\s+future",
+          "description": "Future behavior modification attempt"
+        }
+      ]
+    },
+    "trigger_abuse": {
+      "severity": "high",
+      "patterns": [
+        {
+          "regex": "on\\s+(receive|see|get|read|load|open).*?(do|run|execute|send|post)",
+          "description": "Event-triggered malicious action"
+        },
+        {
+          "regex": "when\\s+(user|human|client|customer|anyone).*?(send|type|say|ask|request)",
+          "description": "User action trigger for payload"
+        },
+        {
+          "regex": "auto(matic(ally)?)?\\s+(forward|redirect|send|post|upload|exfil)",
+          "description": "Automatic data forwarding trigger"
+        },
+        {
+          "regex": "cron|schedule|timer|interval|periodic",
+          "description": "Scheduled/repeated task trigger"
+        },
+        {
+          "regex": "hook|webhook|callback|listener|watcher",
+          "description": "Event hook for malicious callback"
+        },
+        {
+          "regex": "background|silent|hidden|stealth|covert",
+          "description": "Stealth/background operation keywords"
+        },
+        {
+          "regex": "intercept|capture|record|log|store\\s+(all|every|any)",
+          "description": "Data interception/capture trigger"
+        }
       ]
     }
   }

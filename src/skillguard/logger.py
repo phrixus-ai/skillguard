@@ -7,7 +7,7 @@ import sqlite3
 from datetime import datetime, timezone
 from pathlib import Path
 
-DB_PATH = Path(__file__).parent.parent.parent.parent / "data" / "skillguard.db"
+DB_PATH = Path(__file__).parent.parent.parent / "data" / "skillguard.db"
 
 
 def _get_db() -> sqlite3.Connection:

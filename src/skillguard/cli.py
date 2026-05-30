@@ -15,6 +15,10 @@ from rich.text import Text
 from skillguard import __version__
 from skillguard.scanners.static import StaticScanner
 from skillguard.scanners.prompt import PromptScanner
+from skillguard.scanners.ast_scanner import ASTScanner
+from skillguard.scanners.taint_tracker import TaintTracker
+from skillguard.scanners.osv_checker import OSVChecker
+from skillguard.output.sarif import write_scan_result_sarif, sarif_to_json_string
 
 console = Console()
 
@@ -41,15 +45,54 @@ def main():
 
 @main.command()
 @click.argument("target", type=click.Path(exists=True))
-@click.option("--json-output", "-j", is_flag=True, help="Output as JSON")
-@click.option("--severity", "-s", type=click.Choice(["critical", "high", "warning", "info"]), default=None, help="Minimum severity filter")
-def scan(target: str, json_output: bool, severity: str | None):
+@click.option("--format", "-f", "output_format", type=click.Choice(["rich", "json", "sarif"]), default="rich", help="Output format")
+@click.option("--severity", "-s", type=click.Choice(["critical", "high", "medium", "low", "info"]), default=None, help="Minimum severity filter")
+@click.option("--deep", "-d", is_flag=True, help="Enable AST + Taint + OSV deep scanning")
+@click.option("--sarif-output", type=click.Path(), default=None, help="Write SARIF to file")
+def scan(target: str, output_format: str, severity: str | None, deep: bool, sarif_output: str | None):
     """Scan a file or directory for security threats."""
     scanner = StaticScanner()
     result = scanner.scan_directory(target)
 
-    if json_output:
+    # Deep scanning: AST + Taint + OSV
+    if deep:
+        ast_scanner = ASTScanner()
+        taint_tracker = TaintTracker()
+        osv_checker = OSVChecker()
+
+        target_path = Path(target)
+        skip_dirs = {"node_modules", ".git", "__pycache__", ".venv", "venv", "dist", "build"}
+
+        if target_path.is_file() and target_path.suffix == ".py":
+            result.findings.extend(ast_scanner.scan_file(target_path))
+            result.findings.extend(taint_tracker.scan_file(target_path))
+        elif target_path.is_dir():
+            count = 0
+            for fp in target_path.rglob("*.py"):
+                if count >= 50:
+                    break
+                if any(skip in fp.parts for skip in skip_dirs):
+                    continue
+                result.findings.extend(ast_scanner.scan_file(fp))
+                result.findings.extend(taint_tracker.scan_file(fp))
+                count += 1
+
+            # OSV dependency check
+            for dep_name in {"requirements.txt", "requirements-dev.txt", "pyproject.toml",
+                             "package.json", "Gemfile", "go.mod", "Cargo.toml", "pom.xml"}:
+                dep_path = target_path / dep_name
+                if dep_path.exists():
+                    result.findings.extend(osv_checker.scan_file(dep_path))
+
+        # Recalculate risk score with new findings (property-based, auto-recalculated)
+
+    if output_format == "json":
         _print_json(result)
+    elif output_format == "sarif":
+        click.echo(sarif_to_json_string(result.findings, target))
+        if sarif_output:
+            write_scan_result_sarif(result, sarif_output)
+            console.print(f"[dim]SARIF written to {sarif_output}[/dim]")
     else:
         _print_rich_report(result, severity_filter=severity)
 

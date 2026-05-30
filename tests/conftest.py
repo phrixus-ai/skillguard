@@ -38,17 +38,30 @@ def rate_limiter():
 @pytest.fixture
 def app_client():
     """Create a Flask test client."""
-    from skillguard.web.app import create_app
-    app = create_app()
+    # Remove any live admin password env vars so tests use default hash ("1234")
+    saved_pw = os.environ.pop("SKILLGUARD_ADMIN_PASSWORD", None)
+    saved_hash = os.environ.pop("ADMIN_PASSWORD_HASH", None)
+    import importlib
+    import skillguard.auth as auth_mod
+    importlib.reload(auth_mod)
+    # Also reload app module since it imports ADMIN_PASSWORD_HASH at module level
+    import skillguard.web.app as app_mod
+    importlib.reload(app_mod)
+    app = app_mod.create_app()
     app.config["TESTING"] = True
     with app.test_client() as client:
         yield client
+    # Restore
+    if saved_pw:
+        os.environ["SKILLGUARD_ADMIN_PASSWORD"] = saved_pw
+    if saved_hash:
+        os.environ["ADMIN_PASSWORD_HASH"] = saved_hash
 
 
 @pytest.fixture
 def admin_client(app_client):
     """Create an authenticated admin client."""
-    app_client.post("/admin/login", data={"password": "skillguard2026"})
+    app_client.post("/admin/login", data={"password": "1234"})
     return app_client
 
 

@@ -56,7 +56,8 @@ def _should_scan(filepath: Path) -> bool:
     return False
 
 
-def scan_huggingface(url: str, scanner: StaticScanner) -> ScanResult:
+def scan_huggingface(url: str, scanner: StaticScanner, ast_scanner=None,
+                    taint_tracker=None, osv_checker=None) -> ScanResult:
     """Scan a Hugging Face repo using the API — no model weight downloads."""
     import time
     start = time.time()
@@ -81,7 +82,7 @@ def scan_huggingface(url: str, scanner: StaticScanner) -> ScanResult:
         data = json.loads(proc.stdout)
     except (subprocess.TimeoutExpired, json.JSONDecodeError, Exception):
         # Fallback to git clone with sparse checkout
-        return _clone_and_scan(url, scanner)
+        return _clone_and_scan(url, scanner, ast_scanner, taint_tracker, osv_checker)
 
     siblings = data.get("siblings", [])
     scan_files = []
@@ -99,6 +100,7 @@ def scan_huggingface(url: str, scanner: StaticScanner) -> ScanResult:
     # Download and scan each file
     import tempfile
     all_findings = []
+    py_files = []  # Collect .py files for AST scan
     with tempfile.TemporaryDirectory() as tmpdir:
         for rfname in scan_files[:100]:  # Max 100 files
             file_url = f"https://huggingface.co/{repo_id}/resolve/main/{rfname}"
@@ -114,8 +116,26 @@ def scan_huggingface(url: str, scanner: StaticScanner) -> ScanResult:
                     for f in findings:
                         f.file = f"huggingface:{repo_id}/{rfname}"
                     all_findings.extend(findings)
+                    if local_path.suffix == ".py":
+                        py_files.append(local_path)
             except (subprocess.TimeoutExpired, Exception):
                 continue
+
+        # AST + Taint scan on Python files
+        if ast_scanner and py_files:
+            for py_path in py_files[:50]:
+                try:
+                    ast_findings = ast_scanner.scan_file(py_path)
+                    for f in ast_findings:
+                        f.file = f"huggingface:{repo_id}/{f.file}"
+                    all_findings.extend(ast_findings)
+                    if taint_tracker:
+                        taint_findings = taint_tracker.scan_file(py_path)
+                        for f in taint_findings:
+                            f.file = f"huggingface:{repo_id}/{f.file}"
+                        all_findings.extend(taint_findings)
+                except Exception:
+                    continue
 
     result = ScanResult(target=url, files_scanned=len(scan_files))
     result.findings = all_findings
@@ -123,7 +143,8 @@ def scan_huggingface(url: str, scanner: StaticScanner) -> ScanResult:
     return result
 
 
-def scan_github(url: str, scanner: StaticScanner) -> ScanResult:
+def scan_github(url: str, scanner: StaticScanner, ast_scanner=None,
+                taint_tracker=None, osv_checker=None) -> ScanResult:
     """Scan a GitHub repo using git clone with depth 1."""
     # Convert URL to git clone URL if needed
     clone_url = url
@@ -131,10 +152,11 @@ def scan_github(url: str, scanner: StaticScanner) -> ScanResult:
         clone_url = clone_url[:-1]
     if not clone_url.endswith(".git"):
         clone_url += ".git"
-    return _clone_and_scan(clone_url, scanner)
+    return _clone_and_scan(clone_url, scanner, ast_scanner, taint_tracker, osv_checker)
 
 
-def _clone_and_scan(url: str, scanner: StaticScanner) -> ScanResult:
+def _clone_and_scan(url: str, scanner: StaticScanner, ast_scanner=None,
+                    taint_tracker=None, osv_checker=None) -> ScanResult:
     """Clone repo with depth 1, filter files, and scan."""
     import time
     start = time.time()
@@ -186,17 +208,57 @@ def _clone_and_scan(url: str, scanner: StaticScanner) -> ScanResult:
                     pass
             all_findings.extend(findings)
 
+        # AST + Taint scan on Python files
+        if ast_scanner:
+            py_count = 0
+            for py_path in repo_dir.rglob("*.py"):
+                if py_count >= 50:
+                    break
+                if any(skip in py_path.parts for skip in {".git", "node_modules", "__pycache__", ".venv"}):
+                    continue
+                try:
+                    ast_findings = ast_scanner.scan_file(py_path)
+                    for f in ast_findings:
+                        try:
+                            f.file = str(py_path.relative_to(repo_dir))
+                        except ValueError:
+                            pass
+                    all_findings.extend(ast_findings)
+                    if taint_tracker:
+                        taint_findings = taint_tracker.scan_file(py_path)
+                        for f in taint_findings:
+                            try:
+                                f.file = str(py_path.relative_to(repo_dir))
+                            except ValueError:
+                                pass
+                        all_findings.extend(taint_findings)
+                    py_count += 1
+                except Exception:
+                    continue
+
+        # OSV dependency check
+        if osv_checker:
+            for dep_name in {"requirements.txt", "pyproject.toml", "package.json"}:
+                dep_path = repo_dir / dep_name
+                if dep_path.exists():
+                    try:
+                        osv_findings = osv_checker.scan_file(dep_path)
+                        all_findings.extend(osv_findings)
+                    except Exception:
+                        pass
+
     result = ScanResult(target=url, files_scanned=files_scanned)
     result.findings = all_findings
     result.duration_seconds = round(time.time() - start, 2)
     return result
 
 
-def smart_scan_url(url: str, scanner: StaticScanner) -> ScanResult:
+def smart_scan_url(url: str, scanner: StaticScanner, ast_scanner=None,
+                  taint_tracker=None, osv_checker=None) -> ScanResult:
     """Smart URL scanner — picks the best strategy based on URL type."""
     if is_huggingface_url(url):
-        return scan_huggingface(url, scanner)
+        return scan_huggingface(url, scanner, ast_scanner, taint_tracker, osv_checker)
     elif is_github_url(url):
-        return scan_github(url, scanner)
+        return scan_github(url, scanner, ast_scanner, taint_tracker, osv_checker)
     else:
-        return _clone_and_scan(url, scanner)
+        return _clone_and_scan(url, scanner, ast_scanner, taint_tracker, osv_checker)

@@ -17,6 +17,9 @@ from flask import Flask, render_template, request, jsonify, send_file, session, 
 
 from skillguard.scanners.static import StaticScanner, ScanResult, Finding
 from skillguard.scanners.prompt import PromptScanner
+from skillguard.scanners.ast_scanner import ASTScanner
+from skillguard.scanners.taint_tracker import TaintTracker
+from skillguard.scanners.osv_checker import OSVChecker
 from skillguard.scanners.url import smart_scan_url
 from skillguard.logger import init_db, log_scan, get_recent_scans, get_scan_stats
 from skillguard.auth import check_admin_auth, admin_required, ADMIN_PASSWORD_HASH, API_KEY
@@ -37,12 +40,22 @@ def create_app() -> Flask:
     init_db()
     static_scanner = StaticScanner()
     prompt_scanner = PromptScanner()
+    ast_scanner = ASTScanner()
+    taint_tracker = TaintTracker()
+    osv_checker = OSVChecker()
     rate_limiter = RateLimiter(max_requests=5, window_seconds=60)
 
     def _client_ip() -> str:
         if request.headers.get("X-Forwarded-For"):
             return request.headers["X-Forwarded-For"].split(",")[0].strip()
         return request.remote_addr or "unknown"
+
+    def _real_ip(data: dict | None = None) -> str:
+        if data and isinstance(data, dict):
+            ip = data.pop("client_ip", None)
+            if ip and ip.strip():
+                return ip.strip()
+        return _client_ip()
 
     # ─── Public Routes ───
 
@@ -227,11 +240,13 @@ def create_app() -> Flask:
         "mcp-audit": "mcp",
     }
 
+    # PLESK_PROXY_IP is set via .env on live server
+    _plesk_ip = os.environ.get("PLESK_PROXY_IP", "")
     def _render_index():
         host = request.host.split(":")[0]
         is_ip = host.replace(".", "").isdigit()
         remote = request.remote_addr or ""
-        via_plesk = remote.startswith("185.95.169.")
+        via_plesk = bool(_plesk_ip and remote.startswith(_plesk_ip))
         is_production = via_plesk
         accept = request.headers.get("Accept", "")
         if "text/markdown" in accept:
@@ -308,8 +323,14 @@ def create_app() -> Flask:
                 except zipfile.BadZipFile:
                     return jsonify({"error": "Invalid zip file"}), 400
                 result = static_scanner.scan_directory(extract_dir)
+                # AST scan for Python files
+                ast_findings = _run_deep_scan(ast_scanner, taint_tracker, osv_checker, extract_dir)
+                result.findings.extend(ast_findings)
             else:
                 result = static_scanner.scan_directory(save_path)
+                # AST scan for single Python file
+                ast_findings = _run_deep_scan(ast_scanner, taint_tracker, osv_checker, save_path)
+                result.findings.extend(ast_findings)
 
         cats = list(set(f.category for f in result.findings[:10]))
         log_scan(
@@ -318,7 +339,7 @@ def create_app() -> Flask:
             files_scanned=result.files_scanned, findings_count=len(result.findings),
             critical_count=result.critical_count(), high_count=result.high_count(),
             warning_count=result.warning_count(), duration_seconds=result.duration_seconds,
-            top_categories=cats, ip_address=_client_ip(),
+            top_categories=cats, ip_address=_real_ip({"client_ip": request.form.get("client_ip", "")}),
             user_agent=request.headers.get("User-Agent", ""),
         )
         return jsonify(_result_to_dict(result))
@@ -346,7 +367,7 @@ def create_app() -> Flask:
             critical_count=sum(1 for f in findings if f.severity == "critical"),
             high_count=sum(1 for f in findings if f.severity == "high"),
             warning_count=sum(1 for f in findings if f.severity == "warning"),
-            top_categories=cats, ip_address=_client_ip(),
+            top_categories=cats, ip_address=_real_ip(data),
             user_agent=request.headers.get("User-Agent", ""),
         )
         return jsonify({
@@ -371,7 +392,7 @@ def create_app() -> Flask:
         if not url:
             return jsonify({"error": "No URL provided"}), 400
 
-        result = smart_scan_url(url, static_scanner)
+        result = smart_scan_url(url, static_scanner, ast_scanner, taint_tracker, osv_checker)
         cats = list(set(f.category for f in result.findings[:10]))
         log_scan(
             scan_type="url", target=url,
@@ -379,7 +400,7 @@ def create_app() -> Flask:
             files_scanned=result.files_scanned, findings_count=len(result.findings),
             critical_count=result.critical_count(), high_count=result.high_count(),
             warning_count=result.warning_count(), duration_seconds=result.duration_seconds,
-            top_categories=cats, ip_address=_client_ip(),
+            top_categories=cats, ip_address=_real_ip(data),
             user_agent=request.headers.get("User-Agent", ""),
         )
         return jsonify(_result_to_dict(result))
@@ -454,6 +475,21 @@ def create_app() -> Flask:
             elif len(tf) > 0: rating = "REVIEW"
             else: rating = "SAFE"
             tool_ratings.append({"tool": tn, "rating": rating, "findings": len(tf)})
+
+        # Log MCP audit
+        _cats = list(set(f["category"] for f in findings)) if findings else []
+        log_scan(
+            scan_type="mcp", target=f"{len(tools)} tools audited",
+            risk_score=risk_score,
+            risk_level="CRITICAL" if risk_score >= 75 else "HIGH" if risk_score >= 50 else "MEDIUM" if risk_score >= 25 else "LOW",
+            findings_count=len(findings),
+            critical_count=sum(1 for f in findings if f["severity"] == "critical"),
+            high_count=sum(1 for f in findings if f["severity"] == "high"),
+            warning_count=sum(1 for f in findings if f["severity"] == "warning"),
+            top_categories=_cats,
+            ip_address=_real_ip(data),
+            user_agent=request.headers.get("User-Agent", ""),
+        )
 
         return jsonify({
             "risk_score": risk_score,
@@ -545,7 +581,7 @@ def create_app() -> Flask:
     def admin_page():
         if not check_admin_auth():
             return render_template("admin_login.html")
-        return render_template("admin.html")
+        return render_template("admin.html", version=__version__)
 
     @app.route("/admin/login", methods=["POST"])
     def admin_login():
@@ -586,6 +622,42 @@ def _result_to_dict(result: ScanResult) -> dict:
         "warning_count": result.warning_count(),
         "findings": [_finding_to_dict(f) for f in result.findings],
     }
+
+
+def _run_deep_scan(ast_scanner, taint_tracker, osv_checker, target: Path, max_files: int = 50) -> list[Finding]:
+    """Run AST + Taint + OSV vulnerability scan on Python files and dependency files."""
+    findings: list[Finding] = []
+    target = Path(target)
+    file_count = 0
+    skip_dirs = {"node_modules", ".git", "__pycache__", ".venv", "venv", "dist", "build"}
+
+    if target.is_file():
+        if target.suffix == ".py":
+            findings.extend(ast_scanner.scan_file(target))
+            findings.extend(taint_tracker.scan_file(target))
+        elif target.name in {"requirements.txt", "requirements-dev.txt", "pyproject.toml",
+                             "setup.py", "setup.cfg", "package.json", "Gemfile",
+                             "go.mod", "Cargo.toml", "pom.xml"}:
+            findings.extend(osv_checker.scan_file(target))
+    elif target.is_dir():
+        for fp in target.rglob("*"):
+            if file_count >= max_files:
+                break
+            if any(skip in fp.parts for skip in skip_dirs):
+                continue
+            if fp.is_file() and fp.suffix == ".py":
+                findings.extend(ast_scanner.scan_file(fp))
+                findings.extend(taint_tracker.scan_file(fp))
+                file_count += 1
+
+        # Also check dependency files (separate from max_files limit)
+        for dep_name in {"requirements.txt", "requirements-dev.txt", "pyproject.toml",
+                         "package.json", "Gemfile", "go.mod", "Cargo.toml", "pom.xml"}:
+            dep_path = target / dep_name
+            if dep_path.exists():
+                findings.extend(osv_checker.scan_file(dep_path))
+
+    return findings
 
 
 def _sanitize_path(filepath: str) -> str:

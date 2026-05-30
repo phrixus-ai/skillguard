@@ -44,7 +44,7 @@
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 10px;
         }
         .stat-box {
@@ -133,6 +133,7 @@
         .badge-file { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
         .badge-prompt { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
         .badge-url { background: var(--emerald-glow); color: var(--emerald); border: 1px solid var(--emerald-border); }
+        .badge-mcp { background: var(--red-bg); color: var(--red); border: 1px solid var(--red-border); }
         .badge-low { background: var(--emerald-glow); color: var(--emerald); border: 1px solid var(--emerald-border); }
         .badge-medium { background: var(--blue-bg); color: var(--blue); border: 1px solid var(--blue-border); }
         .badge-high { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-border); }
@@ -169,6 +170,7 @@
             <div class="stat-box"><div class="value" style="color:var(--blue)" id="fileScans">—</div><div class="label">File Scans</div></div>
             <div class="stat-box"><div class="value" style="color:var(--amber)" id="promptScans">—</div><div class="label">Prompt Scans</div></div>
             <div class="stat-box"><div class="value" style="color:var(--emerald)" id="urlScans">—</div><div class="label">URL Scans</div></div>
+            <div class="stat-box"><div class="value" style="color:var(--red)" id="mcpScans">—</div><div class="label">MCP Audits</div></div>
         </div>
 
         <div class="section-label">RECENT SCANS</div>
@@ -187,6 +189,7 @@
                 <option value="file">File</option>
                 <option value="prompt">Prompt</option>
                 <option value="url">URL</option>
+                <option value="mcp">MCP Audit</option>
             </select>
             <span id="filterCount" style="font-family:var(--font-mono);font-size:11px;color:var(--steel);margin-left:auto"></span>
         </div>
@@ -196,7 +199,7 @@
             </div>
         </div>
 
-        <footer>SkillGuard v0.1.0 — <a href="#">PHRIXUS</a> — Admin Panel</footer>
+        <footer>SkillGuard v{{ version }} — <a href="https://github.com/phrixus-ai/skillguard">PHRIXUS</a> — Admin Panel</footer>
     </div>
 
     <script>
@@ -218,6 +221,7 @@
                 document.getElementById('fileScans').textContent = stats.by_type?.file || 0;
                 document.getElementById('promptScans').textContent = stats.by_type?.prompt || 0;
                 document.getElementById('urlScans').textContent = stats.by_type?.url || 0;
+                document.getElementById('mcpScans').textContent = stats.by_type?.mcp || 0;
 
                 applyFilters();
             } catch (e) {

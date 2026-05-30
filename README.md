@@ -3,7 +3,8 @@
 **AI Skill & Prompt Security Scanner** — detect malware, prompt injection, hidden payloads, and credential leaks in AI skills, plugins, and prompt files.
 
 [![Live Demo](https://img.shields.io/badge/Live-Demo-00d992?style=flat-square)](https://skillguard.burakgider.com)
-[![Tests](https://img.shields.io/badge/Tests-106%20passed-00d992?style=flat-square)](#test-suite)
+|[![Tests](https://img.shields.io/badge/Tests-106%20passed-00d992?style=flat-square)](#test-suite)
+|[![Patterns](https://img.shields.io/badge/Patterns-263-00d992?style=flat-square)](#pattern-database)
 [![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -28,8 +29,12 @@ As AI agents become more powerful with skills, plugins, and MCP servers, the att
 - **📁 File Scanning** — upload `.py`, `.md`, `.js`, `.sh`, `.yaml` files for threat analysis
 - **💬 Prompt Scanning** — analyze text input for injection patterns
 - **🔗 URL Scanning** — scan GitHub repos and HuggingFace models remotely
+- **🔬 AST Scanner** — Python AST-based code structure analysis (exec, eval, subprocess, dynamic imports)
+- **🔗 Taint Tracking** — credential→network/source→sink data flow analysis (Python)
+- **🔍 OSV.dev CVE Lookup** — live dependency vulnerability checking (PyPI, npm, RubyGems, Go, Rust, Maven)
+- **📋 SARIF Output** — CI/CD integration (GitHub Code Scanning compatible)
 - **🔒 MCP Audit** — audit MCP server tool definitions for security risks
-- **🛡️ 237 Patterns** — 10 malware categories + 8 injection categories
+- **🛡️ 263 Patterns** — 10 malware categories + 11 injection categories
 - **📊 Risk Scoring** — 0-100 with dynamic severity levels (LOW / MEDIUM / HIGH / CRITICAL)
 - **🔐 Admin Dashboard** — scan history with date/type filters
 - **⚡ Rate Limiting** — 5 scans/minute per IP
@@ -200,6 +205,21 @@ skillguard/
 ---
 
 ## Changelog
+
+### v0.3.0 — Deep Scanning Engine
+
+Major upgrade inspired by [NVIDIA SkillSpector](https://github.com/nvidia/skillspector). Adds code-level analysis beyond regex pattern matching.
+
+**What's new:**
+- **🔬 AST Scanner** — Python AST-based code structure analysis: `exec()`, `eval()`, `subprocess`, `os.system`, dynamic imports, dangerous `getattr()` chains
+- **🔗 Taint Tracking** — Intra-function data flow analysis: credential/env var → network requests, code execution, file writes (Python only, 50 file limit, 3 variable hops)
+- **🔍 OSV.dev CVE Lookup** — Live dependency vulnerability checking against OSV.dev database (PyPI, npm, RubyGems, Go, Rust, Maven)
+- **📋 SARIF Output** — GitHub Code Scanning compatible SARIF v2.1.0 export via CLI `--format sarif`
+- **26 new injection patterns** — 3 new categories: `excessive_agency` (10), `memory_poisoning` (9), `trigger_abuse` (7)
+- **CLI `--deep` flag** — Enable AST + Taint + OSV scanning in one command
+- **CLI `--format sarif`** — Output SARIF for CI/CD pipelines
+
+**Pattern count:** 237 → 263 (+26)
 
 ### v0.2.0 — Context Hijacking Detection
 
